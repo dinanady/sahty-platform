@@ -23,7 +23,24 @@ class Drug extends Model
 
     public function healthCenters()
     {
-        return $this->belongsToMany(HealthCenter::class, 'health_center_drug')
+        return $this->belongsToMany(HealthCenter::class, 'health_center_drugs')
             ->withPivot(['availability', 'stock']);
     }
+
+    //scopes
+    public function scopeFilterByHealthCenter($query, $healthCenterId = null)
+    {
+        if ($healthCenterId) {
+            return $query->whereHas('healthCenters', function ($q) use ($healthCenterId) {
+                $q->where('health_center_id', $healthCenterId);
+            })->with([
+                        'healthCenters' => function ($q) use ($healthCenterId) {
+                            $q->where('health_center_id', $healthCenterId);
+                        }
+                    ]);
+        }
+
+        return $query;
+    }
+
 }

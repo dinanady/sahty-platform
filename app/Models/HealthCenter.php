@@ -15,7 +15,8 @@ class HealthCenter extends Model
         'phone',
         'governorate_id',
         'city_id',
-        'latitude', '
+        'latitude',
+        '
         longitude',
         'working_hours',
         'available_doses',
@@ -44,8 +45,9 @@ class HealthCenter extends Model
 
     public function drugs()
     {
-        return $this->belongsToMany(Drug::class, 'health_center_drug')
-            ->withPivot(['availability', 'stock']);
+        return $this->belongsToMany(Drug::class, 'health_center_drugs')
+            ->withPivot('availability', 'stock')
+            ->withTimestamps();
     }
 
     public function appointments()

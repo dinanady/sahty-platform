@@ -4,11 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('health_center_drug', function (Blueprint $table) {
+        Schema::create('health_center_drugs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('health_center_id')->constrained()->onDelete('cascade');
             $table->foreignId('drug_id')->constrained()->onDelete('cascade');
@@ -18,8 +20,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('vaccine_center_drug');
+        Schema::dropIfExists('health_center_drugs');
     }
 };
