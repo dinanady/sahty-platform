@@ -17,17 +17,17 @@ return new class extends Migration
             $table->string('child_name');
             $table->date('child_birth_date');
             $table->unsignedBigInteger('vaccine_id');
-            $table->unsignedBigInteger('vaccine_center_id');
+            $table->unsignedBigInteger('health_center_id');
             $table->date('appointment_date');
             $table->time('appointment_time');
             $table->enum('status', ['مجدول', 'مكتمل', 'ملغي', 'لم يحضر'])->default('مجدول');
             $table->integer('dose_number')->default(1);
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('vaccine_id')->references('id')->on('vaccines');
-            $table->foreign('vaccine_center_id')->references('id')->on('vaccine_centers');
+            $table->foreign('health_center_id')->references('id')->on('health_centers');
         });
     }
 

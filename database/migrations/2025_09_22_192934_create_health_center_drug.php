@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('vaccine_center_drug', function (Blueprint $table) {
+        Schema::create('health_center_drug', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vaccine_center_id')->constrained()->onDelete('cascade');
+            $table->foreignId('health_center_id')->constrained()->onDelete('cascade');
             $table->foreignId('drug_id')->constrained()->onDelete('cascade');
             $table->boolean('availability')->default(true);
             $table->integer('stock')->default(0);
