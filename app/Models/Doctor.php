@@ -35,11 +35,6 @@ class Doctor extends Model
         return $this->hasMany(DoctorScheduleOverride::class);
     }
 
-    public function specialty(): BelongsTo
-    {
-        return $this->belongsTo(DoctorSpecialty::class, 'doctor_specialty_id');
-    }
-
     //Methods
     public function getScheduleForDate($date)
     {
