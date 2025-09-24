@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HealthCenter extends Model
 {
@@ -13,11 +16,9 @@ class HealthCenter extends Model
         'name',
         'address',
         'phone',
-        'governorate_id',
         'city_id',
         'latitude',
-        '
-        longitude',
+        'longitude',
         'working_hours',
         'available_doses',
         'registration_number',
@@ -28,29 +29,29 @@ class HealthCenter extends Model
         'working_hours' => 'array',
     ];
 
-    public function governorate()
+    public function governorate(): BelongsTo
     {
         return $this->belongsTo(Governorate::class);
     }
 
-    public function city()
+    public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    public function doctors()
+    public function doctors(): HasMany
     {
         return $this->hasMany(Doctor::class);
     }
 
-    public function drugs()
+    public function drugs(): BelongsToMany
     {
         return $this->belongsToMany(Drug::class, 'health_center_drugs')
             ->withPivot('availability', 'stock')
             ->withTimestamps();
     }
 
-    public function appointments()
+    public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
     }

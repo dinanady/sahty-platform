@@ -22,7 +22,6 @@ class HealthCenterFactory extends Factory
             'name' => $this->faker->company,
             'address' => $this->faker->address,
             'phone' => $this->faker->unique()->numerify('01#########'),
-            'governorate_id' => Governorate::factory(),
             'city_id' => City::factory(),
             'latitude' => $this->faker->latitude,
             'longitude' => $this->faker->longitude,
