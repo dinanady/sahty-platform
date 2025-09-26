@@ -55,4 +55,9 @@ class HealthCenter extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function vaccines()
+    {
+        return $this->belongsToMany(Vaccine::class)->withPivot('availability');
+    }
 }

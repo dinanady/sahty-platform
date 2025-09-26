@@ -10,9 +10,16 @@ class Appointment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id','child_name','child_birth_date','vaccine_id',
-        'health_center_id','appointment_date','appointment_time',
-        'status','dose_number','notes'
+        'national_id',
+        'child_name',
+        'child_birth_date',
+        'vaccine_id',
+        'health_center_id',
+        'appointment_date',
+        'appointment_time',
+        'status',
+        'dose_number',
+        'notes'
     ];
 
     public function user()

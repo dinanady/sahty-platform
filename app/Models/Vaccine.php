@@ -25,4 +25,16 @@ class Vaccine extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function healthCenters()
+    {
+        return $this->belongsToMany(HealthCenter::class)->withPivot('availability');
+    }
+
+    //scopes
+    public function scopeFilterByAge($query, $age)
+    {
+        return $query->where('age_months_min', '<=', $age)
+            ->where('age_months_max', '>=', $age);
+    }
 }

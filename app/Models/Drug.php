@@ -18,6 +18,11 @@ class Drug extends Model
         'insurance_covered',
         'category',
         'dosage_form',
+        'approval_status',
+        'submitted_by_center_id',
+        'is_government_approved',
+        'approved_at',
+        'approved_by',
         'is_active'
     ];
 
@@ -41,6 +46,16 @@ class Drug extends Model
         }
 
         return $query;
+    }
+
+    public function scopeGovernmentApproved($query)
+    {
+        return $query->where('is_government_approved', true);
+    }
+
+    public function scopeCenterSubmitted($query)
+    {
+        return $query->where('submitted_by_center_id', '!=', null);
     }
 
 }
