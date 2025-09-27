@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\GovernorateController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\HealthCenterController;
+use App\Http\Controllers\Admin\HealthCenterManagerController;
 use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -60,6 +61,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         'update' => 'health-centers.update',
         'destroy' => 'health-centers.destroy',
     ]);
+     Route::resource('health-center-managers', HealthCenterManagerController::class)->names([
+        'index' => 'health-center-managers.index',
+        'create' => 'health-center-managers.create',
+        'store' => 'health-center-managers.store',
+        'edit' => 'health-center-managers.edit',
+        'update' => 'health-center-managers.update',
+        'destroy' => 'health-center-managers.destroy',
+        'show'  => 'health-center-managers.show',
+    ]);
+     Route::post('/health-center-managers/{healthCenterManager}/toggle-status', [HealthCenterManagerController::class, 'toggleStatus'])
+        ->name('health-center-managers.toggle-status');
+
+    // تعيين وحدة صحية للمدير
+    Route::post('/health-center-managers/{healthCenterManager}/assign-health-center', [HealthCenterManagerController::class, 'assignHealthCenter'])
+        ->name('health-center-managers.assign-health-center');
+
 });
 
 // مسار افتراضي للصفحة الرئيسية

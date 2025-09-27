@@ -27,6 +27,7 @@ class StoreHealthCenterManagerRequest extends FormRequest
             'national_id' => 'required|string|size:14|unique:users,national_id',
             'password' => 'required|string|min:6|confirmed',
             'health_center_id' => 'nullable|exists:health_centers,id',
+            'is_active' => 'boolean',
         ];
     }
 

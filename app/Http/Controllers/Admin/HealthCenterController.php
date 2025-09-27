@@ -10,16 +10,7 @@ use Illuminate\Http\Request;
 
 class HealthCenterController extends Controller
 {
-       public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware(function ($request, $next) {
-            if (!auth()->user()->isAdmin()) {
-                abort(403, 'غير مصرح لك بالوصول لهذه الصفحة');
-            }
-            return $next($request);
-        });
-    }
+     
     public function index()
     {
         $healthCenters = HealthCenter::with(['governorate', 'city'])

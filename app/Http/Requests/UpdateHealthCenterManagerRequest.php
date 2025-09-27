@@ -6,34 +6,27 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateHealthCenterManagerRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // يمكنك تعديل هذا حسب منطق الصلاحيات
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
+        $userId = $this->healthCenterManager?->id ?? null;
+
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:users,email,' . $this->healthCenterManager->id,
-            'phone' => 'required|string|regex:/^01[0-2,5]{1}[0-9]{8}$/|unique:users,phone,' . $this->healthCenterManager->id,
-            'national_id' => 'required|string|size:14|unique:users,national_id,' . $this->healthCenterManager->id,
+            'email' => 'nullable|email' . ($userId ? "|unique:users,email,{$userId}" : ''),
+            'phone' => 'required|string|regex:/^01[0-2,5]{1}[0-9]{8}$/' . ($userId ? "|unique:users,phone,{$userId}" : ''),
+            'national_id' => 'required|string|size:14' . ($userId ? "|unique:users,national_id,{$userId}" : ''),
             'password' => 'nullable|string|min:6|confirmed',
             'health_center_id' => 'nullable|exists:health_centers,id',
-            'is_active' => 'boolean',
+            'is_verified' => 'boolean', // Changed to is_verified
         ];
     }
 
-    /**
-     * Get custom error messages for validator errors.
-     */
     public function messages(): array
     {
         return [
