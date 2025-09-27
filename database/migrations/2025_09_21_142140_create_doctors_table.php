@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('specialty');
-            $table->string('phone', 13)->unique();
+            $table->string('phone', 25)->unique();
             $table->foreignId('health_center_id')->constrained()->onDelete('cascade');
             $table->boolean('is_active')->default(true);
             $table->timestamps();

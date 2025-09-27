@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->string('name');
             $table->text('address');
             $table->string('phone', 13)->unique();
-            $table->foreignId('governorate_id')->constrained()->onDelete('cascade');
             $table->foreignId('city_id')->constrained()->onDelete('cascade');
             $table->foreignId('manager_id')->nullable()->constrained('users')->onDelete('set null');
             $table->decimal('latitude', 10, 8)->nullable();
