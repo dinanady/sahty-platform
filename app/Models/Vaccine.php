@@ -28,8 +28,11 @@ class Vaccine extends Model
 
     public function healthCenters()
     {
-        return $this->belongsToMany(HealthCenter::class)->withPivot('availability');
+        return $this->belongsToMany(HealthCenter::class)
+            ->withPivot('availability')
+            ->withTimestamps(); // <<< ده مهم
     }
+
 
     //scopes
     public function scopeFilterByAge($query, $age)

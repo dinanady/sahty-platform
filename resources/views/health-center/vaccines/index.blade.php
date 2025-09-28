@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.master')
 
 @section('title', 'إدارة اللقاحات')
 
@@ -83,7 +83,11 @@
                                                 </label>
                                             </div>
                                         </td>
-                                        <td>{{ $vaccine->pivot->created_at->format('Y-m-d') }}</td>
+                                        <td>
+                                            {{ $vaccine->pivot->created_at
+                                                ? $vaccine->pivot->created_at->format('Y-m-d')
+                                                : '-' }}
+                                        </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <button type="button" class="btn btn-outline-info"
@@ -204,7 +208,7 @@
 </div>
 @endsection
 
-@push('styles')
+@section('styles')
 <style>
 .vaccine-card {
     transition: all 0.3s ease;
@@ -231,9 +235,9 @@
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 </style>
-@endpush
+@endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // البحث في اللقاحات المتاحة
@@ -327,7 +331,7 @@ function addSelectedVaccines() {
 // إضافة لقاح واحد للمركز
 async function addVaccineToCenter(vaccineId) {
     try {
-        const response = await fetch('/vaccines/add-to-center', {
+        const response = await fetch('/health-center/vaccines', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -353,8 +357,8 @@ async function updateVaccineAvailability(vaccineId, availability, toggleElement)
     const label = toggleElement.nextElementSibling;
 
     try {
-        const response = await fetch(`/vaccines/${vaccineId}/availability`, {
-            method: 'PATCH',
+        const response = await fetch(`/health-center/vaccines/${vaccineId}/availability`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -410,7 +414,7 @@ function removeVaccine(vaccineId) {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`/vaccines/${vaccineId}/remove-from-center`, {
+                const response = await fetch(`/health-center/vaccines/${vaccineId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -469,7 +473,7 @@ function removeVaccine(vaccineId) {
 // عرض تفاصيل اللقاح
 async function showVaccineDetails(vaccineId) {
     try {
-        const response = await fetch(`/vaccines/${vaccineId}`);
+        const response = await fetch(`/health-center/vaccines/${vaccineId}`);
         const vaccine = await response.json();
 
         if (response.ok) {
@@ -538,4 +542,4 @@ function checkAvailableVaccines() {
     }
 }
 </script>
-@endpush
+@endsection

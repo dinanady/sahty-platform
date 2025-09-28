@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\HealthCenter\AppointmentController;
 use App\Http\Controllers\HealthCenter\DrugController;
+use App\Http\Controllers\HealthCenter\VaccineController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('health-center')->name('health-center.')->group(function () {
@@ -23,4 +24,7 @@ Route::prefix('health-center')->name('health-center.')->group(function () {
     Route::resource('appointments', AppointmentController::class);
     Route::get('/appointments/create/modal', [AppointmentController::class, 'createModal'])->name('appointments.create.modal');
     Route::post('/get-child-by-national-id', [AppointmentController::class, 'getChildByNationalId'])->name('get.child.by.national.id');
+
+    Route::resource('vaccines', VaccineController::class);
+    Route::put('vaccines/{id}/availability', [VaccineController::class, 'updateAvailability'])->name('vaccines.availability');
 });

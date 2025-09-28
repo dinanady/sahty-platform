@@ -134,9 +134,9 @@ class VaccineController extends Controller
             ->where('is_active', true);
 
         if ($healthCenterId) {
-            $query->whereHas('healthCenters', function($q) use ($healthCenterId) {
+            $query->whereHas('healthCenters', function ($q) use ($healthCenterId) {
                 $q->where('health_center_id', $healthCenterId)
-                  ->where('availability', true);
+                    ->where('availability', true);
             });
         }
 
