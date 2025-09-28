@@ -410,7 +410,7 @@ function removeHighlight(element) {
 }
 
 function loadAvailableDrugs() {
-    $.get('/health-center/drugs/available')
+    $.get('/health-center/drugs-available')
         .done(function(drugs) {
             const select = $('select[name="drug_id"]');
             select.empty().append('<option value="">-- اختر الدواء --</option>');

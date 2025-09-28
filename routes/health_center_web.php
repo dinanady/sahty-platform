@@ -14,7 +14,7 @@ Route::prefix('health-center')->name('health-center.')->group(function () {
         ->except(['edit']);
 
     Route::post('{id}/toggle', [DrugController::class, 'toggle'])->name('drugs.toggle');
-    Route::get('available', [DrugController::class, 'available'])->name('drugs.available');
+    Route::get('drugs-available', [DrugController::class, 'available'])->name('drugs.available');
 
     Route::post('drugs/submit-new', [DrugController::class, 'submitNewDrug'])->name('drugs.submit-new');
     Route::get('/drugs-pending', [DrugController::class, 'pendingDrugs'])->name('drugs.pending');

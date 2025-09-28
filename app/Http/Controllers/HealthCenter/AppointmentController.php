@@ -28,8 +28,8 @@ class AppointmentController extends Controller
             ->byDoseNumber($request->dose_number);
 
         $appointments = $query->orderBy('appointment_date', 'desc')
-                            ->orderBy('appointment_time', 'desc')
-                            ->paginate(20);
+            ->orderBy('appointment_time', 'desc')
+            ->paginate(20);
 
         $vaccines = Vaccine::all();
         $healthCenters = HealthCenter::all();
@@ -45,13 +45,16 @@ class AppointmentController extends Controller
             ]);
         }
 
-        return view('appointments.index', compact('appointments', 'vaccines', 'healthCenters', 'statuses'));
+        return view('health-center.appointments.index', compact('appointments', 'vaccines', 'healthCenters', 'statuses'));
     }
 
     public function store(AppointmentStoreRequest $request)
     {
         try {
-            $appointment = Appointment::create($request->validated());
+            $data = $request->validated();
+            $data['health_center_id'] = auth()->user()->health_center_id;
+
+            $appointment = Appointment::create($data);
 
             if ($request->ajax()) {
                 return response()->json([
@@ -61,8 +64,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            return redirect()->route('appointments.index')
-                            ->with('success', 'تم إنشاء الحجز بنجاح');
+            return redirect()->route('health-center.appointments.index')
+                ->with('success', 'تم إنشاء الحجز بنجاح');
         } catch (\Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
@@ -128,8 +131,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            return redirect()->route('appointments.index')
-                            ->with('success', 'تم تحديث الحجز بنجاح');
+            return redirect()->route('health-center.appointments.index')
+                ->with('success', 'تم تحديث الحجز بنجاح');
         } catch (\Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
@@ -156,8 +159,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            return redirect()->route('appointments.index')
-                            ->with('success', 'تم حذف الحجز بنجاح');
+            return redirect()->route('health-center.appointments.index')
+                ->with('success', 'تم حذف الحجز بنجاح');
         } catch (\Exception $e) {
             if (request()->ajax()) {
                 return response()->json([
@@ -187,8 +190,10 @@ class AppointmentController extends Controller
 
     private function checkAppointmentAccess($appointment)
     {
-        if (Auth::check() && Auth::user()->health_center_id &&
-            $appointment->health_center_id != Auth::user()->health_center_id) {
+        if (
+            Auth::check() && Auth::user()->health_center_id &&
+            $appointment->health_center_id != Auth::user()->health_center_id
+        ) {
             abort(403, 'غير مصرح لك بالوصول إلى هذا الحجز');
         }
     }
