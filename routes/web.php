@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\HealthCenterController;
 use App\Http\Controllers\Admin\HealthCenterManagerController;
 use Illuminate\Support\Facades\Route;
+
+require __DIR__.'/health_center_web.php';
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -25,7 +28,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     // لوحة التحكم الرئيسية
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    
+
     // التقارير
     Route::get('/reports', [AdminDashboardController::class, 'reports'])->name('reports');
 

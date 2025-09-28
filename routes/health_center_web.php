@@ -4,25 +4,21 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\HealthCenter\DrugController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'health.center'])->prefix('health-center')->name('health-center.')->group(function () {
+Route::prefix('health-center')->name('health-center.')->group(function () {
 
     // Dashboard
     Route::get('/', [DrugController::class, 'index'])->name('dashboard');
 
-    Route::prefix('drugs')->name('drugs.')->group(function () {
-        Route::resource('', DrugController::class)
-            ->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::resource('/drugs', DrugController::class)
+        ->except(['edit']);
 
-        Route::post('{id}/toggle', [DrugController::class, 'toggle'])->name('toggle');
-        Route::get('available', [DrugController::class, 'available'])->name('available');
+    Route::post('{id}/toggle', [DrugController::class, 'toggle'])->name('drugs.toggle');
+    Route::get('available', [DrugController::class, 'available'])->name('drugs.available');
 
-        // ========== Add new drug ==========
-        Route::get('create', [DrugController::class, 'create'])->name('create');
-        Route::post('submit-new', [DrugController::class, 'submitNewDrug'])->name('submit-new');
-        Route::get('pending', [DrugController::class, 'pendingDrugs'])->name('pending');
-        Route::get('rejected', [DrugController::class, 'rejectedDrugs'])->name('rejected');
-        Route::post('{id}/resubmit', [DrugController::class, 'resubmit'])->name('resubmit');
-    });
+    Route::post('drugs/submit-new', [DrugController::class, 'submitNewDrug'])->name('drugs.submit-new');
+    Route::get('/drugs-pending', [DrugController::class, 'pendingDrugs'])->name('drugs.pending');
+    Route::get('/drugs-rejected', [DrugController::class, 'rejectedDrugs'])->name('drugs.rejected');
+    Route::post('/drugs/{id}/resubmit', [DrugController::class, 'resubmit'])->name('drugs.resubmit');
 
     Route::resource('appointments', AppointmentController::class);
     Route::get('/appointments/create/modal', [AppointmentController::class, 'createModal'])->name('appointments.create.modal');

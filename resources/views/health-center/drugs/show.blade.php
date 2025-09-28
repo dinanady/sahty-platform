@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.master')
 
 @section('title', 'تفاصيل الدواء - ' . $drug->name)
 
@@ -222,7 +222,7 @@
 
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 $(document).ready(function() {
     // تغيير حالة التوفر
@@ -312,4 +312,4 @@ function updateStockStatus(stock) {
     location.reload();
 }
 </script>
-@endpush
+@endsection

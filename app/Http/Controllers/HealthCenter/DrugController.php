@@ -7,6 +7,8 @@ use App\Models\Drug;
 use App\Models\HealthCenterDrug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DrugController extends Controller
 {
@@ -86,103 +88,189 @@ class DrugController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'stock' => 'required|integer|min:0'
-        ]);
+        try {
+            $request->validate([
+                'stock' => 'required|integer|min:0'
+            ]);
 
-        $healthCenterId = Auth::user()->health_center_id;
+            $healthCenterId = Auth::user()->health_center_id;
 
-        HealthCenterDrug::where('health_center_id', $healthCenterId)
-            ->where('drug_id', $id)
-            ->update(['stock' => $request->stock]);
+            $updated = HealthCenterDrug::where('health_center_id', $healthCenterId)
+                ->where('drug_id', $id)
+                ->update(['stock' => $request->stock]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تحديث الكمية بنجاح'
-        ]);
+            if (!$updated) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لم يتم العثور على الدواء في مركزك'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث الكمية بنجاح'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating drug stock: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث الكمية'
+            ], 500);
+        }
     }
 
     public function toggle($id)
     {
-        $healthCenterId = Auth::user()->health_center_id;
+        try {
+            $healthCenterId = Auth::user()->health_center_id;
 
-        $healthCenterDrug = HealthCenterDrug::where('health_center_id', $healthCenterId)
-            ->where('drug_id', $id)
-            ->firstOrFail();
+            $healthCenterDrug = HealthCenterDrug::where('health_center_id', $healthCenterId)
+                ->where('drug_id', $id)
+                ->first();
 
-        $healthCenterDrug->update([
-            'availability' => !$healthCenterDrug->availability
-        ]);
+            if (!$healthCenterDrug) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لم يتم العثور على الدواء في مركزك'
+                ], 404);
+            }
 
-        return response()->json([
-            'success' => true,
-            'availability' => $healthCenterDrug->availability,
-            'message' => $healthCenterDrug->availability ? 'الدواء متاح الآن' : 'الدواء غير متاح'
-        ]);
+            $healthCenterDrug->update([
+                'availability' => !$healthCenterDrug->availability
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'availability' => $healthCenterDrug->availability,
+                'message' => $healthCenterDrug->availability ? 'الدواء متاح الآن' : 'الدواء غير متاح'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error toggling drug availability: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث حالة التوفر'
+            ], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'drug_id' => 'required|exists:drugs,id',
-            'stock' => 'required|integer|min:0',
-            'availability' => 'boolean'
-        ]);
+        try {
+            $request->validate([
+                'drug_id' => 'required|exists:drugs,id',
+                'stock' => 'required|integer|min:0',
+                'availability' => 'boolean'
+            ]);
 
-        $healthCenterId = Auth::user()->health_center_id;
+            $healthCenterId = Auth::user()->health_center_id;
 
-        // التأكد من أن الدواء غير مضاف مسبقاً
-        $exists = HealthCenterDrug::where('health_center_id', $healthCenterId)
-            ->where('drug_id', $request->drug_id)
-            ->exists();
+            // التأكد من أن الدواء غير مضاف مسبقاً
+            $exists = HealthCenterDrug::where('health_center_id', $healthCenterId)
+                ->where('drug_id', $request->drug_id)
+                ->exists();
 
-        if ($exists) {
+            if ($exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'هذا الدواء مضاف بالفعل لمركزك'
+                ], 422);
+            }
+
+            // التأكد من أن الدواء معتمد حكومياً
+            $drug = Drug::where('id', $request->drug_id)
+                ->where('is_government_approved', true)
+                ->first();
+
+            if (!$drug) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا يمكن إضافة هذا الدواء لأنه غير معتمد حكومياً'
+                ], 422);
+            }
+
+            HealthCenterDrug::create([
+                'health_center_id' => $healthCenterId,
+                'drug_id' => $request->drug_id,
+                'stock' => $request->stock,
+                'availability' => $request->availability ?? true
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إضافة الدواء بنجاح'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'هذا الدواء مضاف بالفعل لمركزك'
-            ]);
+                'message' => 'البيانات المدخلة غير صحيحة',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error adding drug to health center: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إضافة الدواء'
+            ], 500);
         }
-
-        HealthCenterDrug::create([
-            'health_center_id' => $healthCenterId,
-            'drug_id' => $request->drug_id,
-            'stock' => $request->stock,
-            'availability' => $request->availability ?? true
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إضافة الدواء بنجاح'
-        ]);
     }
 
     public function destroy($id)
     {
-        $healthCenterId = Auth::user()->health_center_id;
+        try {
+            $healthCenterId = Auth::user()->health_center_id;
 
-        HealthCenterDrug::where('health_center_id', $healthCenterId)
-            ->where('drug_id', $id)
-            ->delete();
+            $deleted = HealthCenterDrug::where('health_center_id', $healthCenterId)
+                ->where('drug_id', $id)
+                ->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم حذف الدواء من مركزك'
-        ]);
+            if (!$deleted) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لم يتم العثور على الدواء في مركزك'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم حذف الدواء من مركزك بنجاح'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error removing drug from health center: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء حذف الدواء'
+            ], 500);
+        }
     }
 
     public function available()
     {
-        $healthCenterId = Auth::user()->health_center_id;
+        try {
+            $healthCenterId = Auth::user()->health_center_id;
 
-        // الأدوية المعتمدة من الحكومة والغير مضافة للمركز
-        $drugs = Drug::governmentApproved()
-            ->whereDoesntHave('healthCenters', function ($q) use ($healthCenterId) {
-                $q->where('health_center_id', $healthCenterId);
-            })
-            ->select('id', 'name', 'scientific_name', 'category')
-            ->get();
+            // الأدوية المعتمدة من الحكومة والغير مضافة للمركز
+            $drugs = Drug::where('is_government_approved', true)
+                ->where('is_active', true)
+                ->whereDoesntHave('healthCenters', function ($q) use ($healthCenterId) {
+                    $q->where('health_center_id', $healthCenterId);
+                })
+                ->select('id', 'name', 'scientific_name', 'category')
+                ->orderBy('name')
+                ->get();
 
-        return response()->json($drugs);
+            return response()->json($drugs);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching available drugs: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحميل الأدوية المتاحة'
+            ], 500);
+        }
     }
 
     // ============= إدارة الأدوية الجديدة =============
@@ -194,54 +282,74 @@ class DrugController extends Controller
 
     public function submitNewDrug(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:drugs,name',
-            'scientific_name' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'manufacturer' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|min:0|max:999999.99',
-            'insurance_covered' => 'boolean',
-            'category' => 'nullable|string|max:255',
-            'dosage_form' => 'nullable|string|max:255',
-            'initial_stock' => 'required|integer|min:0'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:drugs,name',
+                'scientific_name' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:1000',
+                'manufacturer' => 'nullable|string|max:255',
+                'price' => 'nullable|numeric|min:0|max:999999.99',
+                'insurance_covered' => 'boolean',
+                'category' => 'nullable|string|max:255',
+                'dosage_form' => 'nullable|string|max:255',
+                'initial_stock' => 'required|integer|min:0'
+            ]);
 
-        $healthCenterId = Auth::user()->health_center_id;
+            $healthCenterId = Auth::user()->health_center_id;
 
-        // إنشاء الدواء الجديد
-        $drug = Drug::create([
-            'name' => $request->name,
-            'scientific_name' => $request->scientific_name,
-            'description' => $request->description,
-            'manufacturer' => $request->manufacturer,
-            'price' => $request->price,
-            'insurance_covered' => $request->has('insurance_covered'),
-            'category' => $request->category,
-            'dosage_form' => $request->dosage_form,
-            'approval_status' => 'pending',
-            'submitted_by_center_id' => $healthCenterId,
-            'is_government_approved' => false,
-            'is_active' => true
-        ]);
+            DB::beginTransaction();
 
-        // إضافة الدواء لمركز المقدم
-        HealthCenterDrug::create([
-            'health_center_id' => $healthCenterId,
-            'drug_id' => $drug->id,
-            'stock' => $request->initial_stock,
-            'availability' => false // غير متاح حتى الموافقة
-        ]);
+            // إنشاء الدواء الجديد
+            $drug = Drug::create([
+                'name' => $request->name,
+                'scientific_name' => $request->scientific_name,
+                'description' => $request->description,
+                'manufacturer' => $request->manufacturer,
+                'price' => $request->price,
+                'insurance_covered' => $request->has('insurance_covered'),
+                'category' => $request->category,
+                'dosage_form' => $request->dosage_form,
+                'approval_status' => 'pending',
+                'submitted_by_center_id' => $healthCenterId,
+                'is_government_approved' => false,
+                'is_active' => true
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إرسال طلب الدواء الجديد بنجاح، في انتظار موافقة الحكومة'
-        ]);
+            // إضافة الدواء لمركز المقدم
+            HealthCenterDrug::create([
+                'health_center_id' => $healthCenterId,
+                'drug_id' => $drug->id,
+                'stock' => $request->initial_stock,
+                'availability' => false // غير متاح حتى الموافقة
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إرسال طلب الدواء الجديد بنجاح، في انتظار موافقة الحكومة'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'البيانات المدخلة غير صحيحة',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error submitting new drug: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إرسال طلب الدواء'
+            ], 500);
+        }
     }
 
     public function pendingDrugs()
     {
         $healthCenterId = Auth::user()->health_center_id;
-
         $pendingDrugs = Drug::where('submitted_by_center_id', $healthCenterId)
             ->where('approval_status', 'pending')
             ->with([
@@ -274,50 +382,65 @@ class DrugController extends Controller
 
     public function resubmit(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'scientific_name' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'manufacturer' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|min:0|max:999999.99',
-            'insurance_covered' => 'boolean',
-            'category' => 'nullable|string|max:255',
-            'dosage_form' => 'nullable|string|max:255'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'scientific_name' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:1000',
+                'manufacturer' => 'nullable|string|max:255',
+                'price' => 'nullable|numeric|min:0|max:999999.99',
+                'insurance_covered' => 'boolean',
+                'category' => 'nullable|string|max:255',
+                'dosage_form' => 'nullable|string|max:255'
+            ]);
 
-        $healthCenterId = Auth::user()->health_center_id;
+            $healthCenterId = Auth::user()->health_center_id;
 
-        $drug = Drug::where('submitted_by_center_id', $healthCenterId)
-            ->where('approval_status', 'rejected')
-            ->findOrFail($id);
+            $drug = Drug::where('submitted_by_center_id', $healthCenterId)
+                ->where('approval_status', 'rejected')
+                ->findOrFail($id);
 
-        // التحقق من عدم تكرار الاسم
-        $existingDrug = Drug::where('name', $request->name)
-            ->where('id', '!=', $id)
-            ->first();
+            // التحقق من عدم تكرار الاسم
+            $existingDrug = Drug::where('name', $request->name)
+                ->where('id', '!=', $id)
+                ->first();
 
-        if ($existingDrug) {
+            if ($existingDrug) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'اسم الدواء موجود بالفعل'
+                ], 422);
+            }
+
+            $drug->update([
+                'name' => $request->name,
+                'scientific_name' => $request->scientific_name,
+                'description' => $request->description,
+                'manufacturer' => $request->manufacturer,
+                'price' => $request->price,
+                'insurance_covered' => $request->has('insurance_covered'),
+                'category' => $request->category,
+                'dosage_form' => $request->dosage_form,
+                'approval_status' => 'pending'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إعادة إرسال طلب الدواء بنجاح'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'اسم الدواء موجود بالفعل'
-            ]);
+                'message' => 'البيانات المدخلة غير صحيحة',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error resubmitting drug: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إعادة إرسال طلب الدواء'
+            ], 500);
         }
-
-        $drug->update([
-            'name' => $request->name,
-            'scientific_name' => $request->scientific_name,
-            'description' => $request->description,
-            'manufacturer' => $request->manufacturer,
-            'price' => $request->price,
-            'insurance_covered' => $request->has('insurance_covered'),
-            'category' => $request->category,
-            'dosage_form' => $request->dosage_form,
-            'approval_status' => 'pending'
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إعادة إرسال طلب الدواء بنجاح'
-        ]);
     }
 }
