@@ -19,9 +19,10 @@ return new class extends Migration
             $table->string('email')->nullable()->unique();
             $table->string('phone', 13)->unique()->nullable();
             $table->string('national_id', 14)->unique();
-            $table->enum('role', ['parent', 'patient', 'admin', 'doctor'])->default('patient');
+            $table->enum('role', ['admin', 'health_center_manager'])->default('health_center_manager');
             $table->enum('preferred_contact', ['email', 'sms'])->default('sms');
             $table->boolean('is_verified')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

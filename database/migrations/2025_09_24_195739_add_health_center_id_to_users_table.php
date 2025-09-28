@@ -4,17 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // تحديث حقل role ليشمل فقط admin وhealth_center_manager
-            $table->enum('role', ['admin', 'health_center_manager'])->default('health_center_manager')->change();
-            // إضافة عمود health_center_id إذا لم يكن موجودًا
-            if (!Schema::hasColumn('users', 'health_center_id')) {
-                $table->foreignId('health_center_id')->nullable()->constrained()->onDelete('set null');
-            }
+            $table->foreignId('health_center_id')->nullable()->constrained()->onDelete('set null')->after('role');
         });
     }
 
