@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\HealthCenter\DrugController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,4 +24,7 @@ Route::middleware(['auth', 'health.center'])->prefix('health-center')->name('hea
         Route::post('{id}/resubmit', [DrugController::class, 'resubmit'])->name('resubmit');
     });
 
+    Route::resource('appointments', AppointmentController::class);
+    Route::get('/appointments/create/modal', [AppointmentController::class, 'createModal'])->name('appointments.create.modal');
+    Route::post('/get-child-by-national-id', [AppointmentController::class, 'getChildByNationalId'])->name('get.child.by.national.id');
 });
