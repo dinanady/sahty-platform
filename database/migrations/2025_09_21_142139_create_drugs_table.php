@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('drugs', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('scientific_name')->nullable();
             $table->text('description')->nullable();
             $table->string('manufacturer')->nullable();

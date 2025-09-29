@@ -10,13 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('doctor_schedule_overrides', function (Blueprint $table) {
+        Schema::create('doctor_schedule_exceptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
-            $table->date('date');
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
-            $table->boolean('available')->default(true);
+            $table->date('exception_date');
+            $table->enum('type', ['unavailable', 'available']);
+            $table->string('reason')->nullable();
             $table->timestamps();
         });
     }
