@@ -20,7 +20,7 @@ class AppointmentStoreRequest extends FormRequest
         return [
             'child_name' => 'required|string|max:255',
             'national_id' => 'required|string|size:14|unique:appointments,national_id',
-            'child_birth_date' => 'required|date',
+            'child_birth_date' => 'nullable|date',
             'vaccine_id' => 'required|exists:vaccines,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',

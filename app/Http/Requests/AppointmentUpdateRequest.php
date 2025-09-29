@@ -27,7 +27,7 @@ class AppointmentUpdateRequest extends FormRequest
         return [
             'child_name' => 'required|string|max:255',
             'national_id' => 'required|string|size:14|unique:appointments,national_id,' . $appointmentId,
-            'child_birth_date' => 'required|date',
+            'child_birth_date' => 'nullable|date',
             'vaccine_id' => 'required|exists:vaccines,id',
             'appointment_date' => 'required|date',
             'appointment_time' => 'required',

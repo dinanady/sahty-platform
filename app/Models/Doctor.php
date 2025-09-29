@@ -25,27 +25,32 @@ class Doctor extends Model
         return $this->belongsTo(HealthCenter::class);
     }
 
-    public function schedules(): HasMany
+    public function schedules()
     {
         return $this->hasMany(DoctorSchedule::class);
     }
 
-    public function overrides(): HasMany
+    public function exceptions()
     {
-        return $this->hasMany(DoctorScheduleOverride::class);
+        return $this->hasMany(DoctorScheduleException::class);
     }
 
-    //Methods
-    public function getScheduleForDate($date)
+    public function isAvailableOn($date)
     {
-        $override = $this->overrides()->where('date', $date)->get();
+        $carbonDate = Carbon::parse($date);
+        $dayOfWeek = strtolower($carbonDate->format('l')); // saturday, sunday...
 
-        if ($override->isNotEmpty()) {
-            return $override; // Collection حتى لو عنصر واحد
+        $exception = $this->exceptions()
+            ->where('exception_date', $carbonDate->format('Y-m-d'))
+            ->first();
+
+        if ($exception) {
+            return $exception->type === 'available';
         }
 
-        $dayOfWeek = strtolower(Carbon::parse($date)->format('l'));
-        return $this->schedules()->where('day_of_week', $dayOfWeek)->get();
+        return $this->schedules()
+            ->where('day_of_week', $dayOfWeek)
+            ->where('available', true)
+            ->exists();
     }
-
 }

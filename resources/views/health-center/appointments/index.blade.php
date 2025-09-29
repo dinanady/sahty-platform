@@ -212,7 +212,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="create_child_birth_date" class="form-label">تاريخ ميلاد الطفل <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="create_child_birth_date" name="child_birth_date" disabled>
+                                <input type="date" class="form-control" id="create_child_birth_date" name="child_birth_date" readonly>
                             </div>
                         </div>
 
@@ -309,7 +309,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="edit_child_birth_date" class="form-label">تاريخ ميلاد الطفل <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="edit_child_birth_date" name="child_birth_date" disabled>
+                                <input type="date" class="form-control" id="edit_child_birth_date" name="child_birth_date" readonly>
                             </div>
                         </div>
 
