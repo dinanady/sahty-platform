@@ -196,9 +196,8 @@
 
         <!--begin::Footer-->
         <div class="app-sidebar-project-default app-sidebar-project-minimize text-center min-h-lg-400px flex-column-auto d-flex flex-column justify-content-end" id="kt_app_sidebar_footer">
-            <h2 class="fw-bold text-gray-800">قال رسول الله ﷺ</h2>
-            <div class="fw-semibold text-gray-700 fs-7 lh-2 px-7 mb-2">أنا وكافل اليتيم في الجنة كهاتين</div>
-            <img class="mx-auto h-150px h-lg-175px mb-4" src="{{ asset('assets/images/ORG-1024x844.png') }}" alt="" />
+            <h2 class="fw-bold text-gray-800">خير الناس أنفعهم للناس</h2>
+            <img class="mx-auto h-150px h-lg-175px mb-4" src="{{ asset('assets/images/logo.png') }}" alt="" />
         </div>
         <!--end::Footer-->
     </div>

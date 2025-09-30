@@ -9,8 +9,8 @@
                 </i>
             </div>
             <a href="" class="app-sidebar-logo">
-                <img alt="Logo" src="{{ asset('assets/images/ORG-1024x844.png') }}" class="h-35px theme-light-show" />
-                <img alt="Logo" src="{{ asset('assets/images/ORG-1024x844.png') }}" class="h-35px theme-dark-show" />
+                <img alt="Logo" src="{{ asset('assets/images/logo.png') }}" class="h-35px theme-light-show" />
+                <img alt="Logo" src="{{ asset('assets/images/logo.png') }}" class="h-35px theme-dark-show" />
             </a>
             <div id="kt_app_sidebar_toggle" class="app-sidebar-toggle btn btn-sm btn-icon btn-color-warning me-n2 d-none d-lg-flex" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="app-sidebar-minimize">
                 <i class="ki-duotone ki-exit-left fs-2x rotate-180">
@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="app-navbar flex-grow-1 justify-content-end" id="kt_app_header_navbar">
-            @if(auth()->user()->check())
+            @if(Auth::check())
                 <div class="app-navbar-item ms-3 ms-lg-4 me-lg-2" id="kt_header_user_menu_toggle">
                     <div class="cursor-pointer symbol symbol-30px symbol-lg-40px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                         {{-- Avatar with initials --}}
