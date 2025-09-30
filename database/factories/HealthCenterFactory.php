@@ -27,7 +27,6 @@ class HealthCenterFactory extends Factory
             'longitude' => $this->faker->longitude,
             'working_hours' => json_encode(['sat' => '09:00-17:00']),
             'available_doses' => $this->faker->numberBetween(0, 50),
-            'registration_number' => $this->faker->unique()->numerify('HC####'),
             'is_active' => true,
         ];
     }

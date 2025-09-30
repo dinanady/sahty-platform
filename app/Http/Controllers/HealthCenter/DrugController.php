@@ -6,12 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Drug;
 use App\Models\HealthCenterDrug;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class DrugController extends Controller
+class DrugController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('hc-view-drugs'), only: ['index', 'show', 'available']),
+            new Middleware(PermissionMiddleware::using('hc-create-drugs'), only: ['create', 'store']),
+            new Middleware(PermissionMiddleware::using('hc-edit-drugs'), only: ['update']),
+            new Middleware(PermissionMiddleware::using('hc-delete-drugs'), only: ['destroy']),
+            new Middleware(PermissionMiddleware::using('hc-toggle-drug-status'), only: ['toggle']),
+            new Middleware(PermissionMiddleware::using('hc-submit-new-drug'), only: ['submitNewDrug', 'pendingDrugs']),
+            new Middleware(PermissionMiddleware::using('hc-resubmit-drug'), only: ['resubmit', 'rejectedDrugs']),
+        ];
+    }
     public function drugs()
     {
         $healthCenterId = Auth::user()->health_center_id;
@@ -34,42 +49,46 @@ class DrugController extends Controller
     {
         $healthCenterId = Auth::user()->health_center_id;
 
-        $query = Drug::filterByHealthCenter($healthCenterId)
-            ->with([
-                'healthCenters' => function ($q) use ($healthCenterId) {
-                    $q->where('health_center_id', $healthCenterId);
-                }
-            ]);
+        // ناخد الفلاتر من الريكوست
+        $filters = $request->only(['search', 'category', 'availability']);
+        $perPage = $request->get('per_page', 15); 
+        $drugs = Drug::where(function ($q) use ($healthCenterId) {
+                $q->whereHas('healthCenters', function ($subQ) use ($healthCenterId) {
+                    $subQ->where('submitted_by_center_id', $healthCenterId);
+                })
+                    ->orWhere(function ($subQ) {
+                    $subQ->where('is_government_approved', true)
+                        ->whereNull('submitted_by_center_id');
+                });
+            })
+            ->applyFilters($filters)
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
-        // فلترة حسب الكاتيجوري
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        // فلترة حسب التوفر
-        if ($request->filled('availability')) {
-            $query->whereHas('healthCenters', function ($q) use ($healthCenterId, $request) {
-                $q->where('health_center_id', $healthCenterId)
-                    ->where('availability', $request->availability == '1');
-            });
-        }
-
-        // بحث بالاسم
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('scientific_name', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $drugs = $query->paginate(15);
         $categories = Drug::filterByHealthCenter($healthCenterId)
             ->whereNotNull('category')
             ->distinct()
             ->pluck('category');
 
-        return view('health-center.drugs.index', compact('drugs', 'categories'));
+        // AJAX response
+        if ($request->ajax()) {
+            return response()->json([
+                'drugs' => [
+                    'html' => view('health-center.drugs.partials.table-rows', compact('drugs'))->render(),
+                    'current_page' => $drugs->currentPage(),
+                    'per_page' => $drugs->perPage(),
+                    'total' => $drugs->total(),
+                    'count' => $drugs->count()
+                ],
+                'pagination' => $drugs->appends($request->all())->links()->render()
+            ]);
+        }
+
+        return view('health-center.drugs.index', compact('drugs', 'categories', 'filters'));
     }
+
+
 
     public function show($id)
     {

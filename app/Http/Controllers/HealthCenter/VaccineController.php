@@ -6,12 +6,25 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vaccine;
 use App\Models\HealthCenter;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class VaccineController extends Controller
+class VaccineController extends Controller implements HasMiddleware
 {
-    // عرض اللقاحات الخاصة بالمركز الصحي
-    public function index()
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('hc-view-vaccines'), only: ['index', 'show']),
+            new Middleware(PermissionMiddleware::using('hc-create-vaccines'), only: ['create', 'store']),
+            new Middleware(PermissionMiddleware::using('hc-edit-vaccines'), only: ['edit', 'update']),
+            new Middleware(PermissionMiddleware::using('hc-delete-vaccines'), only: ['destroy']),
+            new Middleware(PermissionMiddleware::using('hc-update-vaccine-availability'), only: ['updateAvailability']),
+        ];
+    }
+
+    public function index(Request $request)
     {
         $user = Auth::user();
         $healthCenter = HealthCenter::find($user->health_center_id);
@@ -24,7 +37,25 @@ class VaccineController extends Controller
         $allVaccines = Vaccine::where('is_active', true)->get();
 
         // جلب اللقاحات المضافة للمركز الصحي
-        $centerVaccines = $healthCenter->vaccines()->withPivot('availability', 'created_at')->get();
+        $centerVaccines = $healthCenter->vaccines()
+            ->withPivot('availability', 'created_at')
+            ->applyFilters($request->only(['search', 'age', 'availability'])) // هنا بتشتغل
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'vaccines' => [
+                    'html' => view('health-center.vaccines.partials.table-rows', compact('centerVaccines'))->render(),
+                    'current_page' => $centerVaccines->currentPage(),
+                    'per_page' => $centerVaccines->perPage(),
+                    'total' => $centerVaccines->total(),
+                    'count' => $centerVaccines->count()
+                ],
+                'pagination' => $centerVaccines->appends($request->all())->links()->render()
+            ]);
+        }
 
         return view('health-center.vaccines.index', compact('allVaccines', 'centerVaccines', 'healthCenter'));
     }
