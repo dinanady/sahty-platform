@@ -34,12 +34,12 @@
         <!--begin::Page-->
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
             <!--begin::Header-->
-            @include('layouts.header')
+            @include('layouts.health-center.header')
             <!--end::Header-->
             <!--begin::Wrapper-->
             <div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">
                 <!--begin::Sidebar-->
-                @include('layouts.sidebar')
+                @include('layouts.health-center.sidebar')
                 <!--end::Sidebar-->
                 <!--begin::Main-->
                 <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
@@ -97,7 +97,7 @@
         </div>
         <!--end::Page-->
     </div>
-    @include('layouts.footer-script')
+    @include('layouts.health-center.footer-script')
 </body>
 <!--end::Body-->
 

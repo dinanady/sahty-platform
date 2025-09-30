@@ -16,7 +16,7 @@ class DoctorResource extends JsonResource
             'phone' => $this->phone,
             'is_active' => $this->is_active,
             'schedules' => DoctorScheduleResource::collection($this->schedules),
-            'today_schedule' => $this->getScheduleForDate(now()->toDateString()),
+            'today_schedule' => $this->isAvailableOn(now()->toDateString()),
         ];
     }
 }

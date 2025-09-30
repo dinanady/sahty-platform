@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HealthCenter\AppointmentController;
+use App\Http\Controllers\HealthCenter\DashboardController;
 use App\Http\Controllers\HealthCenter\DoctorController;
 use App\Http\Controllers\HealthCenter\DrugController;
 use App\Http\Controllers\HealthCenter\VaccineController;
@@ -10,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('health-center')->name('health-center.')->group(function () {
 
     // Dashboard
-    Route::get('/', [DrugController::class, 'index'])->name('dashboard');
-
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
     //drugs
     Route::resource('/drugs', DrugController::class)
         ->except(['edit']);

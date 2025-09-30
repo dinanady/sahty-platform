@@ -460,7 +460,6 @@
                     }
 
                     if (!response.ok) {
-                        // هنا هنتعامل مع 422 أو أي خطأ تاني
                         if (response.status === 422 && data.errors) {
                             let allErrors = [];
                             Object.values(data.errors).forEach(errArray => {

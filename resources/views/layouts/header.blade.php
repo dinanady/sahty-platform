@@ -20,20 +20,20 @@
             </div>
         </div>
         <div class="app-navbar flex-grow-1 justify-content-end" id="kt_app_header_navbar">
-            @if(Auth::check())
+            @if(auth()->user()->check())
                 <div class="app-navbar-item ms-3 ms-lg-4 me-lg-2" id="kt_header_user_menu_toggle">
                     <div class="cursor-pointer symbol symbol-30px symbol-lg-40px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-             
+
                     </div>
                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
                         <div class="menu-item px-3">
                             <div class="menu-content d-flex align-items-center px-3">
                                 <div class="symbol symbol-50px me-5" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="0, 0">
-                                    
+
                                     <a href="#" class="fw-semibold text-muted text-hover-primary fs-7">
                                         {{ Auth::user()->email }}
                                     </a>
-                                    
+
                                 </div>
                             </div>
                         </div>

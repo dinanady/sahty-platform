@@ -141,10 +141,19 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">
                                     <i class="fas fa-user text-primary me-1"></i>
-                                    الاسم الكامل <span class="text-danger">*</span>
+                                    الاسم الاول <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="name" name="name" required
-                                    placeholder="أدخل الاسم الكامل">
+                                <input type="text" class="form-control" id="first_name" name="first_name" required
+                                    placeholder="أدخل الاسم الاول">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-user text-primary me-1"></i>
+                                    الاسم الاخير <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required
+                                    placeholder="أدخل الاسم الاخير">
                                 <div class="invalid-feedback"></div>
                             </div>
 
@@ -241,7 +250,8 @@
 
                             <div class="col-12">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                                    <input class="form-check-input" type="checkbox" id="is_active" value="1"
+                                        name="is_active" checked>
                                     <label class="form-check-label fw-semibold" for="is_active">
                                         <i class="fas fa-toggle-on text-success me-1"></i>
                                         تفعيل المستخدم
@@ -533,7 +543,8 @@
                     document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>تعديل المستخدم';
                     document.getElementById('user_id').value = data.user.id;
                     document.getElementById('form_method').value = 'PUT';
-                    document.getElementById('name').value = data.user.name || '';
+                    document.getElementById('first_name').value = data.user.first_name || '';
+                    document.getElementById('last_name').value = data.user.last_name || '';
                     document.getElementById('email').value = data.user.email || '';
                     document.getElementById('phone').value = data.user.phone || '';
                     document.getElementById('national_id').value = data.user.national_id || '';
@@ -678,7 +689,8 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
                 .then(response => {
@@ -716,11 +728,12 @@
                                     feedback.textContent = error.errors[key][0];
                                 }
                             }
+                            errorMessages += '• ' + error.errors[key][0] + '<br>';
                         });
                         Swal.fire({
                             icon: 'warning',
                             title: 'تنبيه!',
-                            text: 'يرجى التحقق من البيانات المدخلة',
+                            html: errorMessages, // استخدم html بدلاً من text
                             confirmButtonText: 'حسناً'
                         });
                     } else {

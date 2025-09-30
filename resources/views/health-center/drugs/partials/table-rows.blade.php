@@ -30,12 +30,14 @@
                        data-drug-id="{{ $drug->id }}"
                        data-original-value="{{ $centerDrug->pivot->stock }}"
                        min="0">
+                @can('hc-edit-drugs')
                 <button class="btn btn-outline-primary update-stock-btn"
                         data-drug-id="{{ $drug->id }}"
                         type="button"
                         style="display: none;">
                     <i class="fas fa-save"></i>
                 </button>
+                @endcan
             </div>
         </td>
         <td>
@@ -64,6 +66,7 @@
                    class="btn btn-outline-info" title="عرض التفاصيل">
                     <i class="fas fa-eye"></i>
                 </a>
+                @can('hc-delete-drugs')
                 <button type="button"
                         class="btn btn-outline-danger remove-drug-btn"
                         data-drug-id="{{ $drug->id }}"
@@ -71,6 +74,7 @@
                         title="حذف من المركز">
                     <i class="fas fa-trash"></i>
                 </button>
+                @endcan
             </div>
         </td>
     </tr>
@@ -95,12 +99,16 @@
                 </p>
                 @if(!request()->hasAny(['search', 'category', 'availability']))
                     <div class="mt-3">
+                        @can('hc-submit-new-drug', $post)
                         <a href="{{ route('health-center.drugs.create') }}" class="btn btn-success me-2">
                             <i class="fas fa-plus me-1"></i>إضافة دواء جديد
                         </a>
+                        @endcan
+                        @can('hc-create-drugs')
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDrugModal">
                             <i class="fas fa-list-plus me-1"></i>إضافة دواء موجود
                         </button>
+                        @endcan
                     </div>
                 @else
                     <button type="button" class="btn btn-outline-secondary mt-3" onclick="document.getElementById('clearFilters').click()">

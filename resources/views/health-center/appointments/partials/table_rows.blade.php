@@ -4,7 +4,6 @@
         <td>{{ $appointment->national_id }}</td>
         <td>{{ $appointment->child_birth_date->format('Y-m-d') }}</td>
         <td>{{ $appointment->vaccine->name }}</td>
-        <td>{{ $appointment->healthCenter->name }}</td>
         <td>{{ $appointment->appointment_date->format('Y-m-d') }}</td>
         <td>{{ $appointment->appointment_time }}</td>
         <td>
