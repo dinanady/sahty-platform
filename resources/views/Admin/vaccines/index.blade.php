@@ -46,6 +46,58 @@
                 </div>
             @endif
 
+            {{-- Search and Filter Card --}}
+            <div class="card mb-6">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('admin.vaccines.index') }}" id="searchForm">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-10">
+                                <label class="form-label fw-bold">البحث عن لقاح</label>
+                                <div class="position-relative">
+                                    <i class="ki-duotone ki-magnifier fs-3 position-absolute top-50 translate-middle-y ms-4">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control form-control-solid ps-12" 
+                                           placeholder="ابحث بالاسم أو الوصف..." 
+                                           value="{{ request('search') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="ki-duotone ki-magnifier fs-2"></i>
+                                        بحث
+                                    </button>
+                                    @if(request('search'))
+                                        <a href="{{ route('admin.vaccines.index') }}" class="btn btn-light-secondary" title="مسح البحث">
+                                            <i class="ki-duotone ki-cross fs-2"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Search Results Info --}}
+            @if(request('search'))
+                <div class="alert alert-info d-flex align-items-center mb-6">
+                    <i class="ki-duotone ki-information-5 fs-2hx text-info me-4">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                    </i>
+                    <div class="d-flex flex-column">
+                        <h4 class="mb-1">نتائج البحث</h4>
+                        <span>تم العثور على <strong>{{ $vaccines->total() }}</strong> نتيجة للبحث عن: <strong>"{{ request('search') }}"</strong></span>
+                    </div>
+                </div>
+            @endif
+
             {{-- Vaccines Table --}}
             <div class="card">
                 <div class="card-body pt-6">
@@ -141,7 +193,16 @@
                                 @empty
                                 <tr>
                                     <td colspan="7" class="text-center text-muted py-10">
-                                        لا توجد لقاحات مضافة
+                                        @if(request('search'))
+                                            <i class="ki-duotone ki-file-deleted fs-5x text-muted mb-5">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            <p class="fw-bold fs-4">لا توجد نتائج للبحث</p>
+                                            <p>حاول البحث بكلمات مختلفة</p>
+                                        @else
+                                            لا توجد لقاحات مضافة
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforelse
@@ -150,12 +211,14 @@
                     </div>
 
                     {{-- Pagination --}}
-                    <div class="d-flex justify-content-between align-items-center mt-5">
-                        <div class="text-muted">
-                            عرض {{ $vaccines->firstItem() ?? 0 }} إلى {{ $vaccines->lastItem() ?? 0 }} من أصل {{ $vaccines->total() }}
+                    @if($vaccines->hasPages())
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <div class="text-muted">
+                                عرض {{ $vaccines->firstItem() ?? 0 }} إلى {{ $vaccines->lastItem() ?? 0 }} من أصل {{ $vaccines->total() }}
+                            </div>
+                            {{ $vaccines->appends(request()->query())->links() }}
                         </div>
-                        {{ $vaccines->links() }}
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>

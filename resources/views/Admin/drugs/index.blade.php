@@ -46,6 +46,85 @@
                 </div>
             @endif
 
+            {{-- Search and Filter Card --}}
+            <div class="card mb-6">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('admin.drugs.index') }}" id="searchForm">
+                        <div class="row g-3 align-items-end">
+                            {{-- Search Input --}}
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">البحث عن دواء</label>
+                                <div class="position-relative">
+                                    <i class="ki-duotone ki-magnifier fs-3 position-absolute top-50 translate-middle-y ms-4">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control form-control-solid ps-12" 
+                                           placeholder="ابحث بالاسم أو الاسم العلمي..." 
+                                           value="{{ request('search') }}">
+                                </div>
+                            </div>
+
+                            {{-- Category Filter --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">التصنيف</label>
+                                <select name="category" class="form-select form-select-solid">
+                                    <option value="">جميع التصنيفات</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
+                                            {{ $cat }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Action Buttons --}}
+                            <div class="col-md-2">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="ki-duotone ki-magnifier fs-2"></i>
+                                        بحث
+                                    </button>
+                                    @if(request('search') || request('category'))
+                                        <a href="{{ route('admin.drugs.index') }}" 
+                                           class="btn btn-light-secondary" 
+                                           title="مسح الفلاتر">
+                                            <i class="ki-duotone ki-cross fs-2"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Search Results Info --}}
+            @if(request('search') || request('category'))
+                <div class="alert alert-info d-flex align-items-center mb-6">
+                    <i class="ki-duotone ki-information-5 fs-2hx text-info me-4">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                    </i>
+                    <div class="d-flex flex-column">
+                        <h4 class="mb-1">نتائج البحث والفلترة</h4>
+                        <span>
+                            تم العثور على <strong>{{ $drugs->total() }}</strong> نتيجة
+                            @if(request('search'))
+                                للبحث عن: <strong>"{{ request('search') }}"</strong>
+                            @endif
+                            @if(request('category'))
+                                @if(request('search')) و @endif
+                                في التصنيف: <strong>{{ request('category') }}</strong>
+                            @endif
+                        </span>
+                    </div>
+                </div>
+            @endif
+
             {{-- Drugs Table --}}
             <div class="card">
                 <div class="card-body pt-6">
@@ -67,7 +146,17 @@
                                 @forelse($drugs as $drug)
                                 <tr>
                                     <td>
-                                        <span class="text-gray-800 fw-bold">{{ $drug->name }}</span>
+                                        <div class="d-flex align-items-center">
+                                            <div class="symbol symbol-45px me-3">
+                                                <span class="symbol-label bg-light-primary">
+                                                    <i class="ki-duotone ki-capsule fs-2x text-primary">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                </span>
+                                            </div>
+                                            <span class="text-gray-800 fw-bold">{{ $drug->name }}</span>
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="text-gray-600">{{ $drug->scientific_name ?? '-' }}</span>
@@ -86,7 +175,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge badge-light-primary">{{ $drug->health_centers_count }}</span>
+                                        <span class="badge badge-light-primary">{{ $drug->health_centers_count }} وحدة</span>
                                     </td>
                                     <td>
                                         @if($drug->is_active)
@@ -130,7 +219,28 @@
                                 @empty
                                 <tr>
                                     <td colspan="8" class="text-center text-muted py-10">
-                                        لا توجد أدوية مضافة
+                                        @if(request('search') || request('category'))
+                                            <i class="ki-duotone ki-file-deleted fs-5x text-muted mb-5">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            <p class="fw-bold fs-4">لا توجد نتائج للبحث</p>
+                                            <p>حاول البحث بكلمات مختلفة أو اختر تصنيف آخر</p>
+                                            <a href="{{ route('admin.drugs.index') }}" class="btn btn-sm btn-light-primary mt-3">
+                                                <i class="ki-duotone ki-arrow-left fs-3"></i>
+                                                عرض جميع الأدوية
+                                            </a>
+                                        @else
+                                            <i class="ki-duotone ki-capsule fs-5x text-muted mb-5">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            <p class="fw-bold fs-4">لا توجد أدوية مضافة</p>
+                                            <a href="{{ route('admin.drugs.create') }}" class="btn btn-sm btn-primary mt-3">
+                                                <i class="ki-duotone ki-plus fs-3"></i>
+                                                إضافة دواء جديد
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforelse
@@ -139,12 +249,14 @@
                     </div>
 
                     {{-- Pagination --}}
-                    <div class="d-flex justify-content-between align-items-center mt-5">
-                        <div class="text-muted">
-                            عرض {{ $drugs->firstItem() ?? 0 }} إلى {{ $drugs->lastItem() ?? 0 }} من أصل {{ $drugs->total() }}
+                    @if($drugs->hasPages())
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <div class="text-muted">
+                                عرض {{ $drugs->firstItem() ?? 0 }} إلى {{ $drugs->lastItem() ?? 0 }} من أصل {{ $drugs->total() }}
+                            </div>
+                            {{ $drugs->links() }}
                         </div>
-                        {{ $drugs->links() }}
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>

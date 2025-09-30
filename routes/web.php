@@ -26,8 +26,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
          ->name('admin.create-manager');
 });
 
-
-Route::prefix('admin')->name('admin.')->group(function () {
+// ⭐ إضافة middleware للـ admin routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // لوحة التحكم الرئيسية
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -35,62 +35,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports', [AdminDashboardController::class, 'reports'])->name('reports');
 
     // إدارة المحافظات
-    Route::resource('governorates', GovernorateController::class)->except(['show'])->names([
-        'index' => 'governorates.index',
-        'create' => 'governorates.create',
-        'store' => 'governorates.store',
-        'edit' => 'governorates.edit',
-        'update' => 'governorates.update',
-        'destroy' => 'governorates.destroy',
-    ]);
+    Route::resource('governorates', GovernorateController::class)->except(['show']);
 
     // إدارة المدن
-    Route::resource('cities', CityController::class)->except(['show'])->names([
-        'index' => 'cities.index',
-        'create' => 'cities.create',
-        'store' => 'cities.store',
-        'edit' => 'cities.edit',
-        'update' => 'cities.update',
-        'destroy' => 'cities.destroy',
-    ]);
+    Route::resource('cities', CityController::class)->except(['show']);
 
     // استرجاع المدن بناءً على المحافظة (API)
     Route::get('/cities-by-governorate', [CityController::class, 'getCitiesByGovernorate'])->name('cities.by-governorate');
 
     // إدارة الوحدات الصحية
-    Route::resource('health-centers', HealthCenterController::class)->names([
-        'index' => 'health-centers.index',
-        'create' => 'health-centers.create',
-        'store' => 'health-centers.store',
-        'edit' => 'health-centers.edit',
-        'update' => 'health-centers.update',
-        'destroy' => 'health-centers.destroy',
-        'show' => 'health-centers.show',
-    ]);
-     Route::resource('health-center-managers', HealthCenterManagerController::class)->names([
-        'index' => 'health-center-managers.index',
-        'create' => 'health-center-managers.create',
-        'store' => 'health-center-managers.store',
-        'edit' => 'health-center-managers.edit',
-        'update' => 'health-center-managers.update',
-        'destroy' => 'health-center-managers.destroy',
-        'show'  => 'health-center-managers.show',
-    ]);
-     Route::post('/health-center-managers/{healthCenterManager}/toggle-status', [HealthCenterManagerController::class, 'toggleStatus'])
+    Route::resource('health-centers', HealthCenterController::class);
+    
+    // إدارة مديري الوحدات
+    Route::resource('health-center-managers', HealthCenterManagerController::class);
+    Route::post('/health-center-managers/{healthCenterManager}/toggle-status', [HealthCenterManagerController::class, 'toggleStatus'])
         ->name('health-center-managers.toggle-status');
-
-    // تعيين وحدة صحية للمدير
     Route::post('/health-center-managers/{healthCenterManager}/assign-health-center', [HealthCenterManagerController::class, 'assignHealthCenter'])
         ->name('health-center-managers.assign-health-center');
-         Route::resource('drugs', DrugController::class);
+    
+    // إدارة الأدوية
+    Route::resource('drugs', DrugController::class);
     Route::post('drugs/{drug}/assign', [DrugController::class, 'assignToHealthCenter'])
         ->name('drugs.assign');
     
-    // اللقاحات
+    // إدارة اللقاحات
     Route::resource('vaccines', VaccineController::class);
     Route::post('vaccines/{vaccine}/assign', [VaccineController::class, 'assignToHealthCenter'])
         ->name('vaccines.assign');
-
 });
 
 // مسار افتراضي للصفحة الرئيسية

@@ -9,13 +9,32 @@ use Illuminate\Http\Request;
 
 class VaccineController extends Controller
 {
-    public function index()
-    {
-        $vaccines = Vaccine::withCount('healthCenters')
-            ->paginate(15);
+    // public function index(Request $request)
+    // {
+    //     $search = $request->input('search');
         
-        return view('admin.vaccines.index', compact('vaccines'));
-    }
+    //     $vaccines = Vaccine::query()
+    //         ->when($search, function($query, $search) {
+    //             $query->where('name', 'like', "%{$search}%")
+    //                   ->orWhere('description', 'like', "%{$search}%");
+    //         })
+    //         ->withCount('healthCenters')
+    //         ->paginate(15)
+    //         ->appends(['search' => $search]); // للحفاظ على البحث في pagination
+        
+    //     return view('admin.vaccines.index', compact('vaccines', 'search'));
+    // }
+    public function index(Request $request)
+{
+    $search = $request->input('search');
+    
+    $vaccines = Vaccine::search($search)
+        ->withCount('healthCenters')
+        ->paginate(15)
+        ->appends(['search' => $search]);
+    
+    return view('admin.vaccines.index', compact('vaccines', 'search'));
+}
 
     public function create()
     {
@@ -75,24 +94,23 @@ class VaccineController extends Controller
             ->with('success', 'تم حذف اللقاح بنجاح');
     }
 
-    // توزيع اللقاحات على الوحدات
-  public function assignToHealthCenter(Request $request, Vaccine $vaccine)
-{
-    $validated = $request->validate([
-        'assignments' => 'required|array',
-        'assignments.*.health_center_id' => 'required|exists:health_centers,id',
-        'assignments.*.stock' => 'required|integer|min:0',
-    ]);
-
-    foreach ($validated['assignments'] as $assignment) {
-        $vaccine->healthCenters()->syncWithoutDetaching([
-            $assignment['health_center_id'] => [
-                'availability' => true,
-                'stock' => $assignment['stock']
-            ]
+    public function assignToHealthCenter(Request $request, Vaccine $vaccine)
+    {
+        $validated = $request->validate([
+            'assignments' => 'required|array',
+            'assignments.*.health_center_id' => 'required|exists:health_centers,id',
+            'assignments.*.stock' => 'required|integer|min:0',
         ]);
-    }
 
-    return back()->with('success', 'تم توزيع اللقاح بنجاح');
-}
+        foreach ($validated['assignments'] as $assignment) {
+            $vaccine->healthCenters()->syncWithoutDetaching([
+                $assignment['health_center_id'] => [
+                    'availability' => true,
+                    'stock' => $assignment['stock']
+                ]
+            ]);
+        }
+
+        return back()->with('success', 'تم توزيع اللقاح بنجاح');
+    }
 }
