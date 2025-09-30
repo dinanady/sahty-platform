@@ -27,7 +27,7 @@ class AppointmentController extends Controller
         $ageInMonths = $birthDate->diffInMonths(now());
 
         // جلب اللقاحات المناسبة
-        $vaccines = Vaccine::filterByAge($ageInMonths)
+        $vaccines = Vaccine::age($ageInMonths)
             ->with('healthCenters.city.governorate')
             ->get();
 

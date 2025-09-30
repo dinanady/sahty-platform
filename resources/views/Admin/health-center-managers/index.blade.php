@@ -70,7 +70,7 @@
                 <!--end::Card header-->
                 <!--begin::Card body-->
                 <div class="card-body pt-0">
-                    
+
                     @if(session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
@@ -164,7 +164,7 @@
                                     <!--end::Status-->
                                     <!--begin::Created Date-->
                                     <td>
-                                        {{ $manager->created_at->format('Y-m-d') }}
+                                        {{ $manager->created_at ? $manager->created_at->format('Y-m-d') : '-' }}
                                     </td>
                                     <!--end::Created Date-->
                                     <!--begin::Action-->
@@ -279,7 +279,7 @@ function deleteManager(id) {
 document.querySelector('[data-kt-customer-table-filter="search"]').addEventListener('keyup', function(e) {
     const searchText = e.target.value.toLowerCase();
     const tableRows = document.querySelectorAll('#kt_customers_table tbody tr');
-    
+
     tableRows.forEach(row => {
         const text = row.textContent.toLowerCase();
         if (text.includes(searchText)) {

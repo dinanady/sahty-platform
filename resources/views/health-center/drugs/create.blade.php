@@ -202,7 +202,7 @@
             $('.invalid-feedback').text('');
 
             $.ajax({
-                url: '/health-center/drugs/submit-new',
+                url: '/health-center/drugs-submit-new',
                 method: 'POST',
                 data: {
                     name: formData.get('name'),

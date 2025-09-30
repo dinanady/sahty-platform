@@ -31,7 +31,7 @@
                         <label class="form-label fw-semibold text-secondary">
                             <i class="fas fa-search text-primary me-2"></i>البحث بالاسم
                         </label>
-                        <input type="text" id="filter_name" name="name" class="form-control form-control-lg"
+                        <input type="text" id="filter_name" name="search_name" class="form-control form-control-lg"
                             placeholder="ابحث عن طبيب..." value="{{ $filters['name'] ?? '' }}">
                     </div>
 
@@ -39,7 +39,7 @@
                         <label class="form-label fw-semibold text-secondary">
                             <i class="fas fa-stethoscope text-info me-2"></i>التخصص
                         </label>
-                        <select id="filter_specialty" name="specialty" class="form-select form-select-lg">
+                        <select id="filter_specialty" name="filter_specialty" class="form-select form-select-lg">
                             <option value="">جميع التخصصات</option>
                             @foreach($specialties as $specialty)
                                 <option value="{{ $specialty }}" {{ ($filters['specialty'] ?? '') == $specialty ? 'selected' : '' }}>

@@ -12,7 +12,7 @@ class DoctorController extends Controller
     public function index(Request $request)
     {
         // Build the query
-        $query = Doctor::with(['schedules', 'overrides'])
+        $query = Doctor::with(['schedules', 'exceptions'])
             ->where('health_center_id', $request->health_center_id)
             ->where('is_active', true);
 
@@ -22,8 +22,8 @@ class DoctorController extends Controller
             $query->whereHas('schedules', function ($q) use ($date) {
                 $dayOfWeek = strtolower(\Carbon\Carbon::parse($date)->format('l'));
                 $q->where('day_of_week', $dayOfWeek)->where('available', true);
-            })->orWhereHas('overrides', function ($q) use ($date) {
-                $q->where('date', $date)->where('available', true);
+            })->orWhereHas('exceptions', function ($q) use ($date) {
+                $q->where('exception_date', $date)->where('type', 'available');
             });
         }
 
@@ -33,7 +33,7 @@ class DoctorController extends Controller
         // Transform the response to include schedules for the specific date
         $doctors->each(function ($doctor) use ($request) {
             if ($request->has('date')) {
-                $doctor->schedules = $doctor->getScheduleForDate($request->date);
+                $doctor->schedules = $doctor->isAvailableOn($request->date);
             }
         });
 
