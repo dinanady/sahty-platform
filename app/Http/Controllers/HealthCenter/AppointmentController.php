@@ -27,6 +27,8 @@ class AppointmentController extends Controller implements HasMiddleware
     }
     public function index(Request $request)
     {
+        $healthCenter = HealthCenter::where('id', Auth::user()->health_center_id)->first();
+
         $query = Appointment::with(['vaccine', 'healthCenter'])
             ->forUserHealthCenter()
             ->byChildName($request->child_name)
@@ -41,8 +43,7 @@ class AppointmentController extends Controller implements HasMiddleware
             ->orderBy('appointment_time', 'desc')
             ->paginate(20);
 
-        $vaccines = Vaccine::all();
-        $healthCenters = HealthCenter::all();
+        $vaccines = $healthCenter->vaccines;
         $statuses = ['مجدول', 'مكتمل', 'ملغي', 'لم يحضر'];
 
         // إذا كان الطلب AJAX، نرجع JSON
@@ -50,12 +51,11 @@ class AppointmentController extends Controller implements HasMiddleware
             return response()->json([
                 'appointments' => $appointments,
                 'vaccines' => $vaccines,
-                'healthCenters' => $healthCenters,
                 'statuses' => $statuses
             ]);
         }
 
-        return view('health-center.appointments.index', compact('appointments', 'vaccines', 'healthCenters', 'statuses'));
+        return view('health-center.appointments.index', compact('appointments', 'vaccines', 'statuses'));
     }
 
     public function store(AppointmentStoreRequest $request)

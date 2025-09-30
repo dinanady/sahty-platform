@@ -13,12 +13,16 @@
             <p class="text-muted mb-0">عرض وإدارة أدوية المركز الصحي</p>
         </div>
         <div class="col-md-6 text-end">
+            @can('hc-submit-new-drug')
             <a href="{{ route('health-center.drugs.create') }}" class="btn btn-success btn-lg shadow-sm me-2">
                 <i class="fas fa-plus-circle me-2"></i>إضافة دواء جديد
             </a>
+            @endcan
+            @can('hc-create-drugs')
             <button type="button" class="btn btn-primary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#addDrugModal">
                 <i class="fas fa-list-plus me-2"></i>إضافة دواء موجود
             </button>
+            @endcan
         </div>
     </div>
 

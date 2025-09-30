@@ -124,9 +124,11 @@
                                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
                                     <i class="fas fa-undo me-1"></i>إعادة تعيين
                                 </button>
+                                @can('hc-submit-new-drug')
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-paper-plane me-1"></i>إرسال للمراجعة
                                 </button>
+                                @endcan
                             </div>
                         </form>
                     </div>

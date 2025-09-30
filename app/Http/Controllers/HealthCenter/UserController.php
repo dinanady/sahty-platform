@@ -56,7 +56,8 @@ class UserController extends Controller implements HasMiddleware
     {
         DB::transaction(function () use ($request) {
             $user = User::create([
-                'name' => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone,
@@ -66,8 +67,9 @@ class UserController extends Controller implements HasMiddleware
                 'is_active' => $request->boolean('is_active'),
             ]);
 
-            if ($request->filled('roles')) {
-                $user->syncRoles($request->roles);
+            if ($request->has('roles')) {
+                $roles = \Spatie\Permission\Models\Role::whereIn('id', (array) $request->roles)->get();
+                $user->syncRoles($roles);
             }
 
             Log::info('User created', ['user_id' => $user->id, 'by' => auth()->id()]);
@@ -94,7 +96,8 @@ class UserController extends Controller implements HasMiddleware
     {
         DB::transaction(function () use ($request, $user) {
             $updateData = [
-                'name' => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'national_id' => $request->national_id,
@@ -108,7 +111,8 @@ class UserController extends Controller implements HasMiddleware
             $user->update($updateData);
 
             if ($request->has('roles')) {
-                $user->syncRoles($request->roles ?? []);
+                $roles = \Spatie\Permission\Models\Role::whereIn('id', (array) $request->roles)->get();
+                $user->syncRoles($roles);
             }
 
             Log::info('User updated', ['user_id' => $user->id, 'by' => auth()->id()]);

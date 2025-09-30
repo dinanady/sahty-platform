@@ -115,7 +115,6 @@
                                     <th class="py-3">الرقم القومي</th>
                                     <th class="py-3">تاريخ الميلاد</th>
                                     <th class="py-3">اللقاح</th>
-                                    <th class="py-3">المركز الصحي</th>
                                     <th class="py-3">تاريخ الموعد</th>
                                     <th class="py-3">الوقت</th>
                                     <th class="py-3">الحالة</th>
@@ -136,7 +135,6 @@
                                         <td class="national-id">{{ $appointment->national_id }}</td>
                                         <td>{{ $appointment->child_birth_date }}</td>
                                         <td>{{ $appointment->vaccine->name }}</td>
-                                        <td>{{ $appointment->healthCenter->name }}</td>
                                         <td>{{ $appointment->appointment_date }}</td>
                                         <td>
                                             <span class="">
