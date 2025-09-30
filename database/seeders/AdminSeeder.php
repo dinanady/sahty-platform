@@ -1,31 +1,44 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        $authService = new AuthService();
-
-        // إنشاء مستخدم أدمن
-        $authService->createUser([
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@example.com',
-            'phone' => '01012345678',
-            'national_id' => '12345678901234',
-            'password' => 'password123', // سيتم تشفيرها باستخدام Hash في AuthService
-            'role' => 'admin',
-            'health_center_id' => null,
-            'is_verified' => true,
+        // تأكد من وجود Role
+        $adminRole = Role::firstOrCreate([
+            'name' => 'admin',
+            'guard_name' => 'web'
+        ], [
+            'display_name' => 'مدير النظام'
         ]);
+
+        // إنشاء المستخدم
+        $user = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'phone' => '01012345678',
+                'national_id' => '12345678901234',
+                'password' => Hash::make('password123'),
+                'role' => 'admin', // للـ backward compatibility
+                'is_verified' => true,
+            ]
+        );
+
+        // إعطاء الدور باستخدام Spatie
+        if (!$user->hasRole('admin')) {
+            $user->assignRole('admin');
+        }
+
+        $this->command->info('Admin user created successfully with role: ' . $user->getRoleNames()->implode(', '));
     }
 }

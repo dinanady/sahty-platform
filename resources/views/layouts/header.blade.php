@@ -23,24 +23,61 @@
             @if(Auth::check())
                 <div class="app-navbar-item ms-3 ms-lg-4 me-lg-2" id="kt_header_user_menu_toggle">
                     <div class="cursor-pointer symbol symbol-30px symbol-lg-40px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-             
+                        {{-- Avatar with initials --}}
+                        <div class="symbol-label fs-5 fw-semibold text-primary bg-light-primary">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
                     </div>
                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
+                        {{-- User Info --}}
                         <div class="menu-item px-3">
                             <div class="menu-content d-flex align-items-center px-3">
-                                <div class="symbol symbol-50px me-5" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="0, 0">
-                                    
+                                <div class="symbol symbol-50px me-5">
+                                    <div class="symbol-label fs-3 fw-semibold text-primary bg-light-primary">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <div class="fw-bold d-flex align-items-center fs-5">
+                                        {{ Auth::user()->name }}
+                                        @if(Auth::user()->role == 'admin')
+                                            <span class="badge badge-light-success fs-8 fw-semibold ms-2">أدمن</span>
+                                        @elseif(Auth::user()->role == 'health_center_manager')
+                                            <span class="badge badge-light-info fs-8 fw-semibold ms-2">مدير وحدة</span>
+                                        @else
+                                            <span class="badge badge-light-primary fs-8 fw-semibold ms-2">مستخدم</span>
+                                        @endif
+                                    </div>
                                     <a href="#" class="fw-semibold text-muted text-hover-primary fs-7">
                                         {{ Auth::user()->email }}
                                     </a>
-                                    
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="separator my-2"></div>
+
+                        {{-- Profile Link --}}
+                        
+
+                        {{-- Theme Mode --}}
                         <div class="menu-item px-5" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="left-start" data-kt-menu-offset="-15px, 0">
                             <a href="#" class="menu-link px-5">
-                                <span class="menu-title position-relative">Mode
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-night-day fs-3 me-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                        <span class="path5"></span>
+                                        <span class="path6"></span>
+                                        <span class="path7"></span>
+                                        <span class="path8"></span>
+                                        <span class="path9"></span>
+                                        <span class="path10"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title position-relative">وضع العرض
                                     <span class="ms-5 position-absolute translate-middle-y top-50 end-0">
                                         <i class="ki-duotone ki-moon theme-dark-show fs-2">
                                             <span class="path1"></span>
@@ -55,7 +92,7 @@
                                         <span class="menu-icon" data-kt-element="icon">
                                             <i class="ki-duotone ki-sun fs-2"></i>
                                         </span>
-                                        <span class="menu-title">Light</span>
+                                        <span class="menu-title">فاتح</span>
                                     </a>
                                 </div>
                                 <div class="menu-item px-3 my-0">
@@ -66,7 +103,7 @@
                                                 <span class="path2"></span>
                                             </i>
                                         </span>
-                                        <span class="menu-title">Dark</span>
+                                        <span class="menu-title">داكن</span>
                                     </a>
                                 </div>
                                 <div class="menu-item px-3 my-0">
@@ -79,14 +116,24 @@
                                                 <span class="path4"></span>
                                             </i>
                                         </span>
-                                        <span class="menu-title">System</span>
+                                        <span class="menu-title">النظام</span>
                                     </a>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="separator my-2"></div>
+
+                        {{-- Logout --}}
                         <div class="menu-item px-5">
                             <a class="menu-link px-5" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                {{ __('تسجيل خروج') }}
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-entrance-left fs-3 me-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                    </i>
+                                </span>
+                                <span class="menu-title">تسجيل خروج</span>
                             </a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                 @csrf

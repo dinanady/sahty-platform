@@ -9,13 +9,25 @@ use Illuminate\Http\Request;
 
 class DrugController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $drugs = Drug::with(['submittedByCenter', 'approvedBy'])
-            ->withCount('healthCenters')
-            ->paginate(15);
+        $search = $request->input('search');
+        $category = $request->input('category');
         
-        return view('admin.drugs.index', compact('drugs'));
+        $drugs = Drug::with(['submittedByCenter', 'approvedBy'])
+            ->when($search, function($query, $search) {
+                $query->search($search);
+            })
+            ->when($category, function($query, $category) {
+                $query->category($category);
+            })
+            ->withCount('healthCenters')
+            ->paginate(15)
+            ->appends(request()->query());
+        
+        $categories = ['مسكنات', 'مضادات حيوية', 'خافض حرارة', 'فيتامينات', 'أخرى'];
+        
+        return view('admin.drugs.index', compact('drugs', 'search', 'category', 'categories'));
     }
 
     public function create()
@@ -87,7 +99,6 @@ class DrugController extends Controller
             ->with('success', 'تم حذف الدواء بنجاح');
     }
 
-    // توزيع الأدوية على الوحدات
     public function assignToHealthCenter(Request $request, Drug $drug)
     {
         $validated = $request->validate([
