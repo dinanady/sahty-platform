@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Vaccine extends Model
 {
-    use HasFactory;
+    use HasFactory, HasFilters;
 
     protected $fillable = [
         'name',
@@ -35,9 +36,29 @@ class Vaccine extends Model
 
 
     //scopes
-    public function scopeFilterByAge($query, $age)
+    public function scopeAge($query, $age)
     {
         return $query->where('age_months_min', '<=', $age)
             ->where('age_months_max', '>=', $age);
     }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->when(
+            $search,
+            fn($q) =>
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+        );
+    }
+
+    public function scopeAvailability($query, $availability)
+    {
+        return $query->when(
+            isset($availability),
+            fn($q) =>
+            $q->where('availability', $availability)
+        );
+    }
+
 }

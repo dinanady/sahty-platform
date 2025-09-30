@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Drug extends Model
 {
-    use HasFactory;
+    use HasFactory, HasFilters;
 
     protected $fillable = [
         'name',
@@ -29,7 +30,8 @@ class Drug extends Model
     public function healthCenters()
     {
         return $this->belongsToMany(HealthCenter::class, 'health_center_drugs')
-            ->withPivot(['availability', 'stock']);
+            ->withPivot(['stock', 'availability', 'created_at', 'updated_at'])
+            ->withTimestamps();
     }
 
     //scopes
@@ -67,4 +69,23 @@ class Drug extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('scientific_name', 'like', "%{$search}%");
+        });
+    }
+
+    public function scopeCategory($query, $category)
+    {
+        return $query->where('category', $category);
+    }
+
+    public function scopeAvailability($query, $availability)
+    {
+        return $query->whereHas('healthCenters', function ($q) use ($availability) {
+            $q->where('health_center_drugs.availability', $availability);
+        });
+    }
 }

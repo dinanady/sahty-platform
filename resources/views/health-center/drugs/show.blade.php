@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.health-center.master')
 
 @section('title', 'تفاصيل الدواء - ' . $drug->name)
 

@@ -1,7 +1,7 @@
 {{-- resources/views/admin/doctors/partials/table-rows.blade.php --}}
 @forelse($doctors as $doctor)
     <tr>
-        <td class="text-end">{{ $doctor->id }}</td>
+        <td class="text-end">{{ $loop->iteration }}</td>
         <td class="text-end fw-bold">{{ $doctor->name }}</td>
         <td class="text-end">{{ $doctor->specialty }}</td>
         <td class="text-end" dir="ltr">{{ $doctor->phone }}</td>
