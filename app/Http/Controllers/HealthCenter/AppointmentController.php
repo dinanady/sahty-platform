@@ -8,13 +8,23 @@ use App\Http\Requests\AppointmentUpdateRequest;
 use App\Models\Appointment;
 use App\Models\Vaccine;
 use App\Models\HealthCenter;
-use App\Http\Requests\StoreAppointmentRequest;
-use App\Http\Requests\UpdateAppointmentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class AppointmentController extends Controller
+class AppointmentController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('hc-view-appointments'), only: ['index', 'show']),
+            new Middleware(PermissionMiddleware::using('hc-create-appointments'), only: ['create', 'store', 'createModal', 'getChildByNationalId']),
+            new Middleware(PermissionMiddleware::using('hc-edit-appointments'), only: ['edit', 'update']),
+            new Middleware(PermissionMiddleware::using('hc-delete-appointments'), only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $query = Appointment::with(['vaccine', 'healthCenter'])

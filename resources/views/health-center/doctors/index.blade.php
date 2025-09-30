@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.health-center.master')
 
 @section('content')
     <div class="container-fluid py-4">
@@ -6,14 +6,13 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <h2 class="mb-0 text-primary">
-                    <i class="fas fa-user-md me-2"></i>
-                    إدارة الأطباء
+                    <i class="fas fa-user-md me-2"></i>إدارة الأطباء
                 </h2>
-                <p class="text-muted mb-0">إدارة وعرض معلومات الأطباء</p>
+                <p class="text-muted mb-0">عرض وإدارة معلومات الأطباء</p>
             </div>
             <div class="col-md-6 text-end">
                 <button onclick="openCreateModal()" class="btn btn-primary btn-lg shadow-sm">
-                    <i class="fas fa-plus-circle me-2"></i> إضافة طبيب جديد
+                    <i class="fas fa-plus-circle me-2"></i>إضافة طبيب جديد
                 </button>
             </div>
         </div>
@@ -23,8 +22,7 @@
             <div class="card-header bg-gradient text-white py-3"
                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <h6 class="mb-0">
-                    <i class="fas fa-filter me-2"></i>
-                    البحث والفلترة السريعة
+                    <i class="fas fa-filter me-2"></i>البحث والفلترة السريعة
                 </h6>
             </div>
             <div class="card-body p-4">
@@ -33,41 +31,60 @@
                         <label class="form-label fw-semibold text-secondary">
                             <i class="fas fa-search text-primary me-2"></i>البحث بالاسم
                         </label>
-                        <input type="text" id="filter_name" class="form-control form-control-lg"
-                            placeholder="ابحث عن طبيب...">
+                        <input type="text" id="filter_name" name="name" class="form-control form-control-lg"
+                            placeholder="ابحث عن طبيب..." value="{{ $filters['name'] ?? '' }}">
                     </div>
+
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-secondary">
                             <i class="fas fa-stethoscope text-info me-2"></i>التخصص
                         </label>
-                        <select id="filter_specialty" class="form-select form-select-lg">
+                        <select id="filter_specialty" name="specialty" class="form-select form-select-lg">
                             <option value="">جميع التخصصات</option>
                             @foreach($specialties as $specialty)
-                                <option value="{{ $specialty }}">{{ $specialty }}</option>
+                                <option value="{{ $specialty }}" {{ ($filters['specialty'] ?? '') == $specialty ? 'selected' : '' }}>
+                                    {{ $specialty }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="col-md-2">
                         <label class="form-label fw-semibold text-secondary">
                             <i class="fas fa-toggle-on text-success me-2"></i>الحالة
                         </label>
-                        <select id="filter_status" class="form-select form-select-lg">
+                        <select id="filter_status" name="status" class="form-select form-select-lg">
                             <option value="">الكل</option>
-                            <option value="1">نشط فقط</option>
-                            <option value="0">غير نشط فقط</option>
+                            <option value="1" {{ ($filters['status'] ?? '') == '1' ? 'selected' : '' }}>نشط</option>
+                            <option value="0" {{ ($filters['status'] ?? '') == '0' ? 'selected' : '' }}>غير نشط</option>
                         </select>
                     </div>
+
+                    <div class="col-md-2">
+                        <button type="reset" class="btn btn-outline-secondary btn-lg w-100" id="clearFilters">
+                            <i class="fas fa-times me-1"></i>مسح
+                        </button>
+                    </div>
                 </div>
+
             </div>
         </div>
 
         <!-- عداد النتائج -->
-        <div class="mb-3">
-            <div class="alert alert-info border-0 shadow-sm d-inline-block">
-                <i class="fas fa-info-circle me-2"></i>
-                إجمالي الأطباء: <strong id="total-count">{{ $doctors->total() }}</strong>
-            </div>
+        <div class="col-md-2">
+            <label class="form-label fw-semibold text-secondary">
+                <i class="fas fa-list-ol text-warning me-2"></i>عدد النتائج
+            </label>
+            <select name="per_page" id="per_page" class="form-select form-select-lg">
+                @foreach([10, 15, 25, 50, 100] as $size)
+                    <option value="{{ $size }}" {{ ($filters['per_page'] ?? 15) == $size ? 'selected' : '' }}>
+                        {{ $size }}
+                    </option>
+                @endforeach
+            </select>
         </div>
+
+
 
         <!-- الجدول -->
         <div class="card shadow-sm border-0">
@@ -110,6 +127,7 @@
             {{ $doctors->links() }}
         </div>
     </div>
+
 
     <!-- Modal إضافة طبيب -->
     <div class="modal fade" id="createModal" tabindex="-1">
@@ -319,6 +337,7 @@
             document.getElementById('filter_name').addEventListener('input', debounceFilter);
             document.getElementById('filter_specialty').addEventListener('change', applyFilters);
             document.getElementById('filter_status').addEventListener('change', applyFilters);
+            document.getElementById('per_page').addEventListener('change', applyFilters);
         });
 
         function debounceFilter() {
@@ -330,11 +349,13 @@
             const name = document.getElementById('filter_name').value;
             const specialty = document.getElementById('filter_specialty').value;
             const status = document.getElementById('filter_status').value;
+            const per_page = document.getElementById('per_page').value;
 
             const params = new URLSearchParams({
                 name: name,
                 specialty: specialty,
-                status: status
+                status: status,
+                per_page: per_page
             });
 
             fetch(`{{ route('health-center.doctors.index') }}?${params}`, {
@@ -649,7 +670,7 @@
             Swal.fire({ icon: 'error', title: 'خطأ!', text: '{{ session('error') }}', timer: 3000 });
         @endif
 
-                                                                 const exceptionModalEl = document.getElementById('exceptionModalShow');
+                                                                         const exceptionModalEl = document.getElementById('exceptionModalShow');
         window.exceptionModalShowInstance = exceptionModalEl ? new bootstrap.Modal(exceptionModalEl) : null;
 
         window.deleteExceptionInShow = function (doctorId, exceptionId) {

@@ -40,8 +40,8 @@ class DoctorFactory extends Factory
                 ->count($this->faker->numberBetween(1, 3))
                 ->create(['doctor_id' => $doctor->id]);
 
-            // Create 0-2 overrides for each doctor
-            \App\Models\DoctorScheduleOverride::factory()
+
+            \App\Models\DoctorScheduleException::factory()
                 ->count($this->faker->numberBetween(0, 2))
                 ->create(['doctor_id' => $doctor->id]);
         });

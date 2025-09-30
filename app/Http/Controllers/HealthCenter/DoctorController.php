@@ -7,57 +7,59 @@ use App\Http\Requests\DoctorStoreRequest;
 use App\Http\Requests\DoctorUpdateRequest;
 use App\Models\Doctor;
 use App\Models\DoctorScheduleException;
-use App\Models\HealthCenter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class DoctorController extends Controller
+class DoctorController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('hc-view-doctors'), only: ['index', 'showDetails', 'getWorkDays']),
+            new Middleware(PermissionMiddleware::using('hc-create-doctors'), only: ['store']),
+            new Middleware(PermissionMiddleware::using('hc-edit-doctors'), only: ['editForm', 'update']),
+            new Middleware(PermissionMiddleware::using('hc-delete-doctors'), only: ['destroy']),
+            new Middleware(PermissionMiddleware::using('hc-toggle-doctor-status'), only: ['toggleStatus']),
+            new Middleware(PermissionMiddleware::using('hc-manage-doctor-exceptions'), only: ['addException', 'deleteException']),
+        ];
+    }
+
     public function index(Request $request)
     {
-        // جلب health_center_id من جدول الـ user
         $healthCenterId = Auth::user()->health_center_id;
 
-        $query = Doctor::with(['healthCenter', 'schedules'])
-            ->where('health_center_id', $healthCenterId);
+        // ناخد الفلاتر من الريكوست
+        $filters = $request->only(['name', 'specialty', 'status']);
+        $perPage = $request->get('per_page', 15); // الافتراضي 15
 
-        // فلترة حسب الاسم
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
-        }
-
-        // فلترة حسب التخصص
-        if ($request->filled('specialty')) {
-            $query->where('specialty', $request->specialty);
-        }
-
-        // فلترة حسب الحالة
-        if ($request->filled('status')) {
-            $query->where('is_active', $request->status);
-        }
-
-        $doctors = $query->latest()->paginate(15);
+        $doctors = Doctor::with(['healthCenter', 'schedules'])
+            ->where('health_center_id', $healthCenterId)
+            ->applyFilters($filters) // هنا بنستخدم الـ Trait
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
         // التخصصات للفلترة
         $specialties = Doctor::where('health_center_id', $healthCenterId)
             ->distinct()
             ->pluck('specialty');
 
-        // AJAX request للفلترة
+        // AJAX response
         if ($request->ajax()) {
-            $html = view('health-center.doctors.partials.table-rows', compact('doctors'))->render();
-            $pagination = $doctors->links()->render();
-
             return response()->json([
-                'html' => $html,
-                'pagination' => $pagination
+                'html' => view('health-center.doctors.partials.table-rows', compact('doctors'))->render(),
+                'pagination' => $doctors->links()->render()
             ]);
         }
 
-        return view('health-center.doctors.index', compact('doctors', 'specialties'));
+        return view('health-center.doctors.index', compact('doctors', 'specialties', 'filters'));
     }
+
 
     public function store(DoctorStoreRequest $request)
     {

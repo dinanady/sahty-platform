@@ -1,95 +1,126 @@
-@extends('layouts.master')
+@extends('layouts.health-center.master')
 
 @section('title', 'إدارة الحجوزات')
 
 @section('content')
-<div class="container-fluid">
-    <!-- فلترة الحجوزات -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title"><i class="fas fa-filter me-2"></i>فلترة الحجوزات</h5>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="mb-0 text-primary">
+                <i class="fas fa-calendar-check me-2"></i>إدارة الحجوزات
+            </h2>
+            <p class="text-muted mb-0">عرض وإدارة حجوزات التطعيمات</p>
         </div>
-        <div class="card-body">
-            <div class="row">
+        <div class="col-md-6 text-end">
+            <button type="button" class="btn btn-primary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#createAppointmentModal">
+                <i class="fas fa-plus-circle me-2"></i>إنشاء حجز جديد
+            </button>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-gradient text-white py-3"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h6 class="mb-0">
+                <i class="fas fa-filter me-2"></i>البحث والفلترة السريعة
+            </h6>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label for="child_name" class="form-label">اسم الطفل</label>
-                    <input type="text" class="form-control filter-input" id="child_name" name="child_name"
-                           placeholder="ابحث باسم الطفل...">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-child text-primary me-2"></i>اسم الطفل
+                    </label>
+                    <input type="text" class="form-control form-control-lg filter-input" id="child_name" name="child_name"
+                        placeholder="ابحث باسم الطفل...">
                 </div>
                 <div class="col-md-3">
-                    <label for="national_id" class="form-label">الرقم القومي</label>
-                    <input type="text" class="form-control filter-input" id="national_id" name="national_id"
-                           placeholder="الرقم القومي...">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-id-card text-info me-2"></i>الرقم القومي
+                    </label>
+                    <input type="text" class="form-control form-control-lg filter-input" id="national_id" name="national_id"
+                        placeholder="الرقم القومي...">
                 </div>
-                <div class="col-md-3">
-                    <label for="vaccine_id" class="form-label">نوع اللقاح</label>
-                    <select class="form-select filter-input" id="vaccine_id" name="vaccine_id">
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-syringe text-success me-2"></i>نوع اللقاح
+                    </label>
+                    <select class="form-select form-select-lg filter-input" id="vaccine_id" name="vaccine_id">
                         <option value="">جميع الأنواع</option>
                         @foreach($vaccines as $vaccine)
                             <option value="{{ $vaccine->id }}">{{ $vaccine->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label for="status" class="form-label">الحالة</label>
-                    <select class="form-select filter-input" id="status" name="status">
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-info-circle text-warning me-2"></i>الحالة
+                    </label>
+                    <select class="form-select form-select-lg filter-input" id="status" name="status">
                         <option value="">جميع الحالات</option>
                         @foreach($statuses as $status)
                             <option value="{{ $status }}">{{ $status }}</option>
                         @endforeach
                     </select>
                 </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <label for="appointment_date" class="form-label">تاريخ الموعد</label>
-                    <input type="date" class="form-control filter-input" id="appointment_date" name="appointment_date">
-                </div>
-                <div class="col-md-3">
-                    <label for="child_birth_date" class="form-label">تاريخ ميلاد الطفل</label>
-                    <input type="date" class="form-control filter-input" id="child_birth_date" name="child_birth_date">
-                </div>
-                <div class="col-md-3">
-                    <label for="dose_number" class="form-label">رقم الجرعة</label>
-                    <input type="number" class="form-control filter-input" id="dose_number" name="dose_number" min="1">
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-secondary w-100" id="clearFilters">
-                        <i class="fas fa-times me-1"></i>مسح الفلاتر
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-secondary btn-lg w-100" id="clearFilters">
+                        <i class="fas fa-times me-1"></i>مسح
                     </button>
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-calendar text-primary me-2"></i>تاريخ الموعد
+                    </label>
+                    <input type="date" class="form-control form-control-lg filter-input" id="appointment_date" name="appointment_date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-birthday-cake text-info me-2"></i>تاريخ ميلاد الطفل
+                    </label>
+                    <input type="date" class="form-control form-control-lg filter-input" id="child_birth_date" name="child_birth_date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary">
+                        <i class="fas fa-hashtag text-success me-2"></i>رقم الجرعة
+                    </label>
+                    <input type="number" class="form-control form-control-lg filter-input" id="dose_number" name="dose_number" min="1">
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- جدول الحجوزات -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-list me-2"></i>قائمة الحجوزات
-                (<span id="appointmentsCount">{{ $appointments->total() }}</span> حجز)
-            </h5>
-            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createAppointmentModal">
-                <i class="fas fa-plus me-1"></i>حجز جديد
-            </button>
+    <!-- عداد النتائج -->
+    <div class="mb-3">
+        <div class="alert alert-info border-0 shadow-sm d-inline-block">
+            <i class="fas fa-info-circle me-2"></i>
+            إجمالي الحجوزات: <strong id="appointmentsCount">{{ $appointments->total() }}</strong>
         </div>
-        <div class="card-body">
+    </div>
+
+    <!-- الجدول -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
             <div id="appointmentsTableContainer">
                 @if($appointments->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" id="appointmentsTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>اسم الطفل</th>
-                                    <th>الرقم القومي</th>
-                                    <th>تاريخ الميلاد</th>
-                                    <th>اللقاح</th>
-                                    <th>المركز الصحي</th>
-                                    <th>تاريخ الموعد</th>
-                                    <th>الوقت</th>
-                                    <th>الحالة</th>
-                                    <th>الجرعة</th>
-                                    <th>الإجراءات</th>
+                            <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <tr class="text-white">
+                                    <th class="py-3">اسم الطفل</th>
+                                    <th class="py-3">الرقم القومي</th>
+                                    <th class="py-3">تاريخ الميلاد</th>
+                                    <th class="py-3">اللقاح</th>
+                                    <th class="py-3">المركز الصحي</th>
+                                    <th class="py-3">تاريخ الموعد</th>
+                                    <th class="py-3">الوقت</th>
+                                    <th class="py-3">الحالة</th>
+                                    <th class="py-3">الجرعة</th>
+                                    <th class="py-3">الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="appointmentsTableBody">
@@ -131,7 +162,7 @@
                                             @endswitch
                                         </td>
                                         <td>
-                                            <span class="badge ">الجرعة {{ $appointment->dose_number }}</span>
+                                            <span class="badge">الجرعة {{ $appointment->dose_number }}</span>
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">

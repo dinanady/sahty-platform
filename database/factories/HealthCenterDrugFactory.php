@@ -19,7 +19,7 @@ class HealthCenterDrugFactory extends Factory
     public function definition(): array
     {
         return [
-            'health_center_id' => HealthCenter::factory(),
+            'health_center_id' => 4,
             'drug_id' => Drug::factory(),
             'availability' => $this->faker->boolean,
             'stock' => $this->faker->numberBetween(0, 1000),

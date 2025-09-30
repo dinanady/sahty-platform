@@ -4,6 +4,7 @@ use App\Http\Controllers\HealthCenter\AppointmentController;
 use App\Http\Controllers\HealthCenter\DoctorController;
 use App\Http\Controllers\HealthCenter\DrugController;
 use App\Http\Controllers\HealthCenter\VaccineController;
+use App\Http\Controllers\HealthCenter\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('health-center')->name('health-center.')->group(function () {
@@ -14,7 +15,7 @@ Route::prefix('health-center')->name('health-center.')->group(function () {
     //drugs
     Route::resource('/drugs', DrugController::class)
         ->except(['edit']);
-    Route::post('{id}/toggle', [DrugController::class, 'toggle'])->name('drugs.toggle');
+    Route::post('drugs/{id}/toggle', [DrugController::class, 'toggle'])->name('drugs.toggle');
     Route::get('drugs-available', [DrugController::class, 'available'])->name('drugs.available');
     Route::post('drugs-submit-new', [DrugController::class, 'submitNewDrug'])->name('drugs.submit-new');
     Route::get('/drugs-pending', [DrugController::class, 'pendingDrugs'])->name('drugs.pending');
@@ -31,6 +32,7 @@ Route::prefix('health-center')->name('health-center.')->group(function () {
     Route::get('/appointments/create/modal', [AppointmentController::class, 'createModal'])->name('appointments.create.modal');
     Route::post('/get-child-by-national-id', [AppointmentController::class, 'getChildByNationalId'])->name('get.child.by.national.id');
 
+    Route::resource('users', UserController::class);
     // Doctor
     Route::get('doctors', [DoctorController::class, 'index'])->name('doctors.index');
     Route::post('doctors', [DoctorController::class, 'store'])->name('doctors.store');
