@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="app-navbar flex-grow-1 justify-content-end" id="kt_app_header_navbar">
-            @if(auth()->user()->check())
+            @if(auth()->check())
                 <div class="app-navbar-item ms-3 ms-lg-4 me-lg-2" id="kt_header_user_menu_toggle">
                     <div class="cursor-pointer symbol symbol-30px symbol-lg-40px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
 

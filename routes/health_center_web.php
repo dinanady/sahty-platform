@@ -8,11 +8,11 @@ use App\Http\Controllers\HealthCenter\VaccineController;
 use App\Http\Controllers\HealthCenter\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('health-center')->name('health-center.')->group(function () {
+Route::middleware(['auth', 'health.center'])->prefix('health-center')->name('health-center.')->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     //drugs
     Route::resource('/drugs', DrugController::class)
         ->except(['edit']);

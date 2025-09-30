@@ -27,11 +27,23 @@ class Drug extends Model
         'is_active'
     ];
 
+    public $casts = [
+        'insurance_covered' => 'boolean',
+        'is_government_approved' => 'boolean',
+        'approved_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'];
+
     public function healthCenters()
     {
         return $this->belongsToMany(HealthCenter::class, 'health_center_drugs')
             ->withPivot(['stock', 'availability', 'created_at', 'updated_at'])
             ->withTimestamps();
+    }
+
+    public function submittedByCenter()
+    {
+        return $this->belongsTo(HealthCenter::class, 'submitted_by_center_id');
     }
 
     //scopes
@@ -58,10 +70,6 @@ class Drug extends Model
     public function scopeCenterSubmitted($query)
     {
         return $query->where('submitted_by_center_id', '!=', null);
-    }
-     public function submittedByCenter()
-    {
-        return $this->belongsTo(HealthCenter::class, 'submitted_by_center_id');
     }
 
     public function approvedBy()
