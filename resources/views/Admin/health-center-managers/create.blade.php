@@ -128,23 +128,28 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div class="row mb-6">
-                                    <div class="col-md-12 fv-row">
-                                        <label class="fs-5 fw-bold mb-2">الوحدة الصحية (اختياري)</label>
-                                        <select name="health_center_id" class="form-select form-select-solid @error('health_center_id') is-invalid @enderror" data-control="select2" data-placeholder="اختر الوحدة الصحية">
-                                            <option value="">بدون تعيين (يمكن التعيين لاحقاً)</option>
-                                            @foreach($healthCenters as $healthCenter)
-                                                <option value="{{$healthCenter->id}}" {{ old('health_center_id') == $healthCenter->id ? 'selected' : '' }}>
-                                                    {{$healthCenter->name}} - {{$healthCenter->governorate->name ?? ''}}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('health_center_id')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <div class="form-text">يمكن ترك هذا الحقل فارغاً وتعيين المدير للوحدة الصحية لاحقاً</div>
-                                    </div>
-                                </div>
+                               <div class="col-md-6 fv-row">
+    <label class="required fs-5 fw-bold mb-2">الوحدة الصحية</label>
+    <select name="health_center_id" class="form-select form-select-solid @error('health_center_id') is-invalid @enderror" data-control="select2" data-placeholder="اختر الوحدة الصحية" required>
+        <option value="">اختر الوحدة الصحية</option>
+        @forelse($healthCenters as $healthCenter)
+            <option value="{{$healthCenter->id}}" {{ old('health_center_id') == $healthCenter->id ? 'selected' : '' }}>
+                {{$healthCenter->name}} - {{$healthCenter->city->name}}
+            </option>
+        @empty
+            <option value="" disabled>جميع الوحدات الصحية لديها مديرين</option>
+        @endforelse
+    </select>
+    @error('health_center_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+    @if($healthCenters->isEmpty())
+        <div class="form-text text-warning">
+            جميع الوحدات الصحية لديها مديرين. 
+            <a href="{{ route('admin.health-centers.create') }}" target="_blank">أضف وحدة صحية جديدة</a>
+        </div>
+    @endif
+</div>
                             </div>
                         </div>
                         <!--end::Work Information-->

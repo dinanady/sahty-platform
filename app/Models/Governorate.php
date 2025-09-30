@@ -11,8 +11,19 @@ class Governorate extends Model
     
     protected $fillable = ['name'];
 
-    public function cities()
-    {
-        return $this->hasMany(City::class);
-    }
+public function cities()
+{
+    return $this->hasMany(City::class);
+}
+
+public function healthCenters()
+{
+    return $this->hasManyThrough(
+        HealthCenter::class,
+        City::class,
+        'governorate_id',
+        'city_id'
+    );
+}
+
 }

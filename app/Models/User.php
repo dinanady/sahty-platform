@@ -40,15 +40,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->first_name . ' ' . $this->last_name;
     }
 
-    public function healthCenter()
-    {
-        return $this->belongsTo(HealthCenter::class);
-    }
+    // في User Model
+public function healthCenter() {
+    return $this->belongsTo(HealthCenter::class, 'health_center_id');
+}
 
-    public function managedHealthCenter()
-    {
-        return $this->hasOne(HealthCenter::class, 'manager_id');
-    }
+// في HealthCenter Model
+public function manager() {
+    return $this->hasOne(User::class, 'health_center_id')
+        ->where('role', 'health_center_manager');
+}
 
     public function isAdmin()
     {

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class HealthCenter extends Model
 {
@@ -20,13 +21,15 @@ class HealthCenter extends Model
         'latitude',
         'longitude',
         'working_hours',
-        'available_doses',
         'registration_number',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'working_hours' => 'array',
+        'is_active' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function governorate(): BelongsTo
@@ -37,6 +40,13 @@ class HealthCenter extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    // علاقة المدير - العلاقة العكسية من User
+    public function manager(): HasOne
+    {
+        return $this->hasOne(User::class, 'health_center_id')
+            ->where('role', 'health_center_manager');
     }
 
     public function doctors(): HasMany
@@ -56,11 +66,10 @@ class HealthCenter extends Model
         return $this->hasMany(Appointment::class);
     }
 
-    public function vaccines()
+    public function vaccines(): BelongsToMany
     {
         return $this->belongsToMany(Vaccine::class)
             ->withPivot('availability')
             ->withTimestamps();
     }
-
 }

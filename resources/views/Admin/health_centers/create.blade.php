@@ -1,59 +1,36 @@
-@dd($governorates)
 @extends('layouts.master')
 @section('title')
     إضافة وحدة صحية جديدة
 @endsection
 @section('page-header')
-    <!--begin::Page title-->
     <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
-        <!--begin::Title-->
         <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
             إضافة وحدة صحية جديدة
         </h1>
-        <!--end::Title-->
-        <!--begin::Breadcrumb-->
         <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-            <!--begin::Item-->
             <li class="breadcrumb-item text-muted">
                 <a href="{{route('admin.dashboard')}}" class="text-muted text-hover-primary">الصفحة الرئيسية</a>
             </li>
-            <!--end::Item-->
-            <!--begin::Item-->
             <li class="breadcrumb-item">
                 <span class="bullet bg-gray-200 w-5px h-2px"></span>
             </li>
-            <!--end::Item-->
-            <!--begin::Item-->
             <li class="breadcrumb-item text-muted">
                 <a href="{{route('admin.health-centers.index')}}" class="text-muted text-hover-primary">الوحدات الصحية</a>
             </li>
-            <!--end::Item-->
-            <!--begin::Item-->
             <li class="breadcrumb-item">
                 <span class="bullet bg-gray-200 w-5px h-2px"></span>
             </li>
-            <!--end::Item-->
-            <!--begin::Item-->
             <li class="breadcrumb-item text-dark">إضافة وحدة جديدة</li>
-            <!--end::Item-->
         </ul>
-        <!--end::Breadcrumb-->
     </div>
-    <!--end::Page title-->
 @endsection
 @section('content')
-    <!--begin::Post-->
     <div class="post d-flex flex-column-fluid" id="kt_post">
-        <!--begin::Container-->
         <div id="kt_content_container" class="container-xxl">
-            <!--begin::Card-->
             <div class="card">
-                <!--begin::Card header-->
                 <div class="card-header">
                     <div class="card-title fs-3 fw-bold">بيانات الوحدة الصحية الجديدة</div>
                 </div>
-                <!--end::Card header-->
-                <!--begin::Card body-->
                 <div class="card-body pt-6">
 
                     @if(session('success'))
@@ -110,11 +87,8 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6 fv-row">
-                                        <label class="fs-5 fw-bold mb-2">عدد الجرعات المتاحة</label>
-                                        <input type="number" name="available_doses" class="form-control form-control-solid @error('available_doses') is-invalid @enderror" placeholder="0" value="{{old('available_doses', 0)}}" min="0"/>
-                                        @error('available_doses')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <label class="fs-5 fw-bold mb-2">ملاحظات</label>
+                                        <input type="text" name="notes" class="form-control form-control-solid" placeholder="ملاحظات إضافية (اختياري)" value="{{old('notes')}}"/>
                                     </div>
                                 </div>
                             </div>
@@ -146,7 +120,7 @@
                                     </div>
                                     <div class="col-md-6 fv-row">
                                         <label class="required fs-5 fw-bold mb-2">المدينة</label>
-                                        <select name="city_id" id="city_select" class="form-select form-select-solid @error('city_id') is-invalid @enderror" data-control="select2" data-placeholder="اختر المدينة أولاً" required>
+                                        <select name="city_id" id="city_select" class="form-select form-select-solid @error('city_id') is-invalid @enderror" data-control="select2" data-placeholder="اختر المدينة" required>
                                             <option value="">اختر المحافظة أولاً</option>
                                         </select>
                                         @error('city_id')
@@ -260,52 +234,67 @@
                         </div>
                     </form>
                 </div>
-                <!--end::Card body-->
             </div>
-            <!--end::Card-->
         </div>
-        <!--end::Container-->
     </div>
-    <!--end::Post-->
 @endsection
 
 @section('scripts')
 <script>
-// Governorates and cities data
-const governoratesData = @json($governorates);
-
 // Form validation
 document.getElementById('create_health_center_form').addEventListener('submit', function() {
     const submitButton = this.querySelector('button[type="submit"]');
     const indicator = submitButton.querySelector('.indicator-label');
     const progress = submitButton.querySelector('.indicator-progress');
     
-    // Hide label and show progress
     indicator.style.display = 'none';
     progress.style.display = 'inline-block';
-    
-    // Disable button
     submitButton.disabled = true;
 });
 
-// Handle governorate change
-document.getElementById('governorate_select').addEventListener('change', function() {
-    const governorateId = this.value;
-    const citySelect = document.getElementById('city_select');
+// Handle governorate change with AJAX
+$('#governorate_select').on('change', function() {
+    const governorateId = $(this).val();
+    const citySelect = $('#city_select');
     
-    // Clear cities
-    citySelect.innerHTML = '<option value="">اختر المدينة</option>';
+    // Clear and disable city select
+    citySelect.empty().append('<option value="">جاري التحميل...</option>');
+    citySelect.prop('disabled', true);
     
     if (governorateId) {
-        const governorate = governoratesData.find(g => g.id == governorateId);
-        if (governorate && governorate.cities) {
-            governorate.cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city.id;
-                option.textContent = city.name;
-                citySelect.appendChild(option);
+        fetch(`/admin/cities-by-governorate?governorate_id=${governorateId}`)
+            .then(response => response.json())
+            .then(cities => {
+                citySelect.empty().append('<option value="">اختر المدينة</option>');
+                
+                if (cities.length > 0) {
+                    cities.forEach(city => {
+                        citySelect.append(`<option value="${city.id}">${city.name}</option>`);
+                    });
+                } else {
+                    citySelect.append('<option value="">لا توجد مدن في هذه المحافظة</option>');
+                }
+                
+                citySelect.prop('disabled', false);
+                
+                // Restore old value if exists
+                const oldCityId = '{{ old("city_id") }}';
+                if (oldCityId) {
+                    citySelect.val(oldCityId);
+                }
+                
+                // Trigger Select2 update
+                citySelect.trigger('change');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                citySelect.empty().append('<option value="">حدث خطأ في التحميل</option>');
+                citySelect.prop('disabled', false);
             });
-        }
+    } else {
+        citySelect.empty().append('<option value="">اختر المحافظة أولاً</option>');
+        citySelect.prop('disabled', false);
+        citySelect.trigger('change');
     }
 });
 
@@ -321,7 +310,6 @@ document.querySelectorAll('input[name="working_days[]"]').forEach(checkbox => {
             endTimeInput.disabled = false;
             startTimeInput.required = true;
             endTimeInput.required = true;
-            // Set default times
             if (!startTimeInput.value) startTimeInput.value = '09:00';
             if (!endTimeInput.value) endTimeInput.value = '17:00';
         } else {
@@ -337,36 +325,15 @@ document.querySelectorAll('input[name="working_days[]"]').forEach(checkbox => {
 
 // Phone number validation
 document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
-    // Allow numbers, spaces, +, -, (, )
     this.value = this.value.replace(/[^0-9\s\+\-\(\)]/g, '');
 });
 
-// Load old values for working hours if validation fails
-document.addEventListener('DOMContentLoaded', function() {
-    // Check old governorate and load cities
+// Load old values if validation fails
+$(document).ready(function() {
     const oldGovernorateId = '{{ old("governorate_id") }}';
-    const oldCityId = '{{ old("city_id") }}';
     
     if (oldGovernorateId) {
-        const governorateSelect = document.getElementById('governorate_select');
-        const citySelect = document.getElementById('city_select');
-        
-        governorateSelect.value = oldGovernorateId;
-        
-        // Load cities for old governorate
-        const governorate = governoratesData.find(g => g.id == oldGovernorateId);
-        if (governorate && governorate.cities) {
-            citySelect.innerHTML = '<option value="">اختر المدينة</option>';
-            governorate.cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city.id;
-                option.textContent = city.name;
-                if (city.id == oldCityId) {
-                    option.selected = true;
-                }
-                citySelect.appendChild(option);
-            });
-        }
+        $('#governorate_select').val(oldGovernorateId).trigger('change');
     }
 });
 </script>

@@ -13,17 +13,17 @@ class UpdateHealthCenterManagerRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = $this->healthCenterManager?->id ?? null;
-
+        $managerId = $this->route('health_center_manager')->id;
+        
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email' . ($userId ? "|unique:users,email,{$userId}" : ''),
-            'phone' => 'required|string|regex:/^01[0-2,5]{1}[0-9]{8}$/' . ($userId ? "|unique:users,phone,{$userId}" : ''),
-            'national_id' => 'required|string|size:14' . ($userId ? "|unique:users,national_id,{$userId}" : ''),
+            'email' => 'nullable|email|unique:users,email,' . $managerId,
+            'phone' => 'required|string|unique:users,phone,' . $managerId . '|regex:/^01[0-2,5]{1}[0-9]{8}$/',
+            'national_id' => 'required|string|size:14|unique:users,national_id,' . $managerId,
             'password' => 'nullable|string|min:6|confirmed',
-            'health_center_id' => 'nullable|exists:health_centers,id',
-            'is_verified' => 'boolean', // Changed to is_verified
+            'health_center_id' => 'required|exists:health_centers,id|unique:users,health_center_id,' . $managerId,
+            'is_active' => 'boolean',
         ];
     }
 
@@ -42,6 +42,9 @@ class UpdateHealthCenterManagerRequest extends FormRequest
             'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
             'email.email' => 'صيغة البريد الإلكتروني غير صحيحة',
             'email.unique' => 'البريد الإلكتروني مستخدم من قبل',
+            'health_center_id.required' => 'يجب اختيار الوحدة الصحية',
+            'health_center_id.exists' => 'الوحدة الصحية المحددة غير موجودة',
+            'health_center_id.unique' => 'هذه الوحدة الصحية لديها مدير بالفعل',
         ];
     }
 }

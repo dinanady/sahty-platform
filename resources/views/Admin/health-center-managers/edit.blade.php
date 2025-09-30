@@ -150,7 +150,7 @@
                                     <div class="col-md-6 fv-row">
                                         <label class="fs-5 fw-bold mb-2">حالة المدير</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $healthCenterManager->is_verified) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $healthCenterManager->is_active ?? true) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="is_active">
                                                 المدير نشط
                                             </label>

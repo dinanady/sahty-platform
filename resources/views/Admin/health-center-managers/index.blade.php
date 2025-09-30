@@ -194,7 +194,7 @@
                                                 <form action="{{ route('admin.health-center-managers.toggle-status', $manager->id) }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     <button type="submit" class="menu-link px-3 border-0 bg-transparent text-start w-100">
-                                                        {{ $manager->is_verified ? 'تعطيل' : 'تفعيل' }}
+                                                        {{ $manager->is_active ? 'تعطيل' : 'تفعيل' }}
                                                     </button>
                                                 </form>
                                             </div>

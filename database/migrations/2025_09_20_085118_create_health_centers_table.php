@@ -16,11 +16,10 @@ return new class extends Migration {
             $table->text('address');
             $table->string('phone', 13)->unique();
             $table->foreignId('city_id')->constrained()->onDelete('cascade');
-            $table->foreignId('manager_id')->nullable()->constrained('users')->onDelete('set null');
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
             $table->json('working_hours');
-            $table->integer('available_doses')->default(0);
+         
             $table->string('registration_number')->unique()->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

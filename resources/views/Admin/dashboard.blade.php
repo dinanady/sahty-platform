@@ -1,228 +1,284 @@
 @extends('layouts.master')
-
 @section('title')
-    إدارة الحسابات
-@endsection
-
-@section('css')
-    <style>
-        #datatable {
-            width: 100%;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        .table .actions-column {
-            min-width: 100px;
-        }
-        .table .btn-group {
-            display: flex;
-            gap: 5px;
-        }
-        .btn-custom {
-            height: 30px;
-            line-height: 1.5;
-            padding: 0 10px;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-        }
-        .pagination .page-link {
-            color: #198754;
-        }
-        .pagination .page-link:hover {
-            background-color: #e2f0d4;
-            color: #155724;
-        }
-        .pagination .page-item.active .page-link {
-            background-color: #198754;
-            color: white;
-        }
-        .pagination .page-item.disabled .page-link {
-            color: #6c757d;
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    لوحة التحكم
 @endsection
 
 @section('page-header')
-    <div class="page-title d-flex flex-column gap-1 me-3 mb-2">
-        <ul class="breadcrumb breadcrumb-separatorless fw-semibold mb-6">
-            <li class="breadcrumb-item text-gray-700 fw-bold lh-1">إدارة الحسابات</li>
-            <li class="breadcrumb-item">
-                <i class="ki-duotone ki-left fs-4 text-gray-700 mx-n1"></i>
+    <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+        <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+            لوحة التحكم
+        </h1>
+        <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
+            <li class="breadcrumb-item text-muted">
+                <a href="{{route('admin.dashboard')}}" class="text-muted text-hover-primary">الصفحة الرئيسية</a>
             </li>
-            <li class="breadcrumb-item text-gray-700 fw-bold lh-1">الحسابات</li>
+            <li class="breadcrumb-item">
+                <span class="bullet bg-gray-200 w-5px h-2px"></span>
+            </li>
+            <li class="breadcrumb-item text-dark">لوحة التحكم</li>
         </ul>
-        <h1 class="page-heading d-flex flex-column justify-content-center text-dark fw-bolder fs-1 lh-0">الحسابات</h1>
     </div>
-    {{-- <div class="d-flex gap-3">
-        <a href="{{ route('accounts.create') }}" class="btn btn-sm btn-success px-4 py-3">إضافة حساب</a>
-    </div> --}}
 @endsection
 
 @section('content')
-<div id="kt_app_content_container" class="app-container container-fluid">
-    <div class="row">
-        <div class="col-md-12 mb-3">
-            <!-- نموذج التصفية -->
-            {{-- <form method="GET" action="{{ route('accounts.index') }}" class="d-flex gap-3 mb-4">
-                <div class="form-group">
-                    <label for="province_id">اختر المحافظة:</label>
-                    <select name="province_id" id="province_id" class="form-control">
-                        <option value="">جميع المحافظات</option>
-                        @foreach($availableProvinces as $province)
-                            <option value="{{ $province->id }}" {{ request('province_id') == $province->id ? 'selected' : '' }}>
-                                {{ $province->name }}
-                            </option>
-                        @endforeach
-                    </select>
+    <div class="post d-flex flex-column-fluid" id="kt_post">
+        <div id="kt_content_container" class="container-xxl">
+            
+            {{-- Statistics Cards --}}
+            <div class="row g-6 mb-6">
+                {{-- Total Health Centers --}}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-flush h-100">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-dark me-2 lh-1">{{ $stats['total_health_centers'] }}</span>
+                                <span class="text-gray-400 pt-1 fw-semibold fs-6">إجمالي الوحدات الصحية</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex align-items-end pt-0">
+                            <div class="d-flex align-items-center flex-column w-100">
+                                <div class="d-flex justify-content-between fw-bold fs-6 text-gray-400 w-100 mt-auto mb-2">
+                                    <span>نشط: {{ $stats['active_health_centers'] }}</span>
+                                    <span>معطل: {{ $stats['inactive_health_centers'] }}</span>
+                                </div>
+                                <div class="h-8px mx-3 w-100 bg-light-success rounded">
+                                    <div class="bg-success rounded h-8px" role="progressbar" 
+                                         style="width: {{ $stats['total_health_centers'] > 0 ? ($stats['active_health_centers'] / $stats['total_health_centers']) * 100 : 0 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-success align-self-end">بحث</button>
-            </form> --}}
-        {{-- </div>
-        <div class="col-md-12 mb-30">
-            <div class="card card-statistics h-100 bg-light">
-                <div class="card-body">
-                    <div class="container">
-                        <div class="table-responsive">
-                            <table id="datatable" class="table table-responsive table-bordered table-striped border-light mb-4">
-                                <thead class="table-success">
-                                    <tr>
-                                        <th>التاريخ</th>
-                                        <th>المبلغ</th>
-                                        <th>العملة</th>
-                                        <th>النوع</th>
-                                        <th>التفاصيل</th>
-                                        <th>المحافظة</th>
-                                        <th>من أين</th>
-                                        <th>رقم الإيصال</th>
-                                        <th>الملاحظات</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($accounts as $account)
-                                        <tr>
-                                            <td>{{ \Carbon\Carbon::parse($account->date)->format('d-m-Y') }}</td>
-                                            <td>
-                                                @if ($account->currency == 'دولار')
-                                                    {{ number_format($account->amount, 0) }} $
-                                                @elseif ($account->currency == 'دينار')
-                                                    {{ number_format($account->amount * 1000, 0) }} د.ع
-                                                @endif
-                                            </td>
-                                            <td>{{ $account->currency }}</td>
-                                            <td>{{ $account->type }}</td>
-                                            <td>
-                                                @if($account->accountDetails->count() > 0)
-                                                    <table class="table table-sm mb-0">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>التفاصيل</th>
-                                                                <th>المبلغ</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($account->accountDetails as $accountDetail)
-                                                                <tr>
-                                                                    <td>{{ $accountDetail->detail->name ?? 'غير معروف' }}</td>
-                                                                    <td>{{ $accountDetail->amount }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                @elseif($account->detail)
-                                                    {{ $account->detail->name }}
-                                                @else
-                                                    لا توجد تفاصيل
-                                                @endif
-                                            </td>
-                                            <td>{{ $account->province->name ?? 'غير متوفر' }}</td>
-                                            <td>{{ $account->person_name ?? '-' }}</td>
-                                            <td>{{ $account->receipt_number }}</td>
-                                            <td>{{ $account->notes }}</td>
-                                            <td>
-                                                <div class="btn-group">
-                                                    @can("تعديل الحسابات")
-                                                        <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-sm btn-success btn-custom">تعديل</a>
-                                                    @endcan
-                                                    @can("حذف الحسابات")
-                                                        <button type="button" class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" data-account-id="{{ $account->id }}">
-                                                            حذف
-                                                        </button>
-                                                    @endcan
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+
+                {{-- Total Managers --}}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-flush h-100">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-dark me-2 lh-1">{{ $stats['total_managers'] }}</span>
+                                <span class="text-gray-400 pt-1 fw-semibold fs-6">مديري الوحدات</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex align-items-end pt-0">
+                            <div class="d-flex align-items-center flex-column w-100">
+                                <div class="d-flex justify-content-between fw-bold fs-6 text-gray-400 w-100 mt-auto mb-2">
+                                    <span>نشط: {{ $stats['active_managers'] }}</span>
+                                    <span>بدون وحدة: {{ $managersWithoutHealthCenter }}</span>
+                                </div>
+                                <div class="h-8px mx-3 w-100 bg-light-primary rounded">
+                                    <div class="bg-primary rounded h-8px" role="progressbar" 
+                                         style="width: {{ $stats['total_managers'] > 0 ? ($stats['active_managers'] / $stats['total_managers']) * 100 : 0 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Governorates --}}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-flush h-100">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-dark me-2 lh-1">{{ $stats['total_governorates'] }}</span>
+                                <span class="text-gray-400 pt-1 fw-semibold fs-6">المحافظات</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex align-items-end pt-0">
+                            <a href="{{ route('admin.governorates.index') }}" class="btn btn-sm btn-light-primary w-100">
+                                عرض الكل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Cities --}}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-flush h-100">
+                        <div class="card-header pt-5">
+                            <div class="card-title d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-dark me-2 lh-1">{{ $stats['total_cities'] }}</span>
+                                <span class="text-gray-400 pt-1 fw-semibold fs-6">المدن</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex align-items-end pt-0">
+                            <a href="{{ route('admin.cities.index') }}" class="btn btn-sm btn-light-info w-100">
+                                عرض الكل
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div> --}}
-</div>
 
-<!-- Delete Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteAccountModalLabel">تأكيد الحذف</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            {{-- Alerts --}}
+            @if($stats['health_centers_without_manager'] > 0)
+            <div class="alert alert-warning d-flex align-items-center mb-6">
+                <i class="ki-duotone ki-information-5 fs-2hx text-warning me-4">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                    <span class="path3"></span>
+                </i>
+                <div class="d-flex flex-column">
+                    <h4 class="mb-1 text-dark">تنبيه</h4>
+                    <span>يوجد {{ $stats['health_centers_without_manager'] }} وحدة صحية بدون مدير</span>
+                </div>
             </div>
-            <form id="delete-account-form" method="POST" action="">
-                @csrf
-                @method('DELETE')
-                <div class="modal-body">
-                    هل أنت متأكد أنك تريد حذف هذا الحساب؟
+            @endif
+
+            <div class="row g-6">
+                {{-- Recent Health Centers --}}
+                <div class="col-xl-8">
+                    <div class="card card-flush h-xl-100">
+                        <div class="card-header pt-7">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800">أحدث الوحدات الصحية</span>
+                                <span class="text-gray-400 mt-1 fw-semibold fs-6">آخر {{ $recentHealthCenters->count() }} وحدات تم إضافتها</span>
+                            </h3>
+                            <div class="card-toolbar">
+                                <a href="{{ route('admin.health-centers.index') }}" class="btn btn-sm btn-light">
+                                    عرض الكل
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                                    <thead>
+                                        <tr class="fw-bold text-muted">
+                                            <th class="min-w-150px">الاسم</th>
+                                            <th class="min-w-120px">الموقع</th>
+                                            <th class="min-w-120px">المدير</th>
+                                            <th class="min-w-100px">الحالة</th>
+                                            <th class="min-w-100px text-end">الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentHealthCenters as $center)
+                                        <tr>
+                                            <td>
+                                                <a href="{{ route('admin.health-centers.show', $center->id) }}" class="text-gray-800 text-hover-primary fw-bold">
+                                                    {{ $center->name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-600 fw-bold">
+                                                    {{ $center->city->name }}, {{ $center->city->governorate->name }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($center->manager)
+                                                    <span class="text-gray-800 fw-bold">
+                                                        {{ $center->manager->first_name }} {{ $center->manager->last_name }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-light-warning">لا يوجد</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($center->is_active)
+                                                    <span class="badge badge-light-success">نشط</span>
+                                                @else
+                                                    <span class="badge badge-light-danger">معطل</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{{ route('admin.health-centers.show', $center->id) }}" class="btn btn-sm btn-light btn-active-light-primary">
+                                                    عرض
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-5">
+                                                لا توجد وحدات صحية
+                                            </td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-success">حذف</button>
+
+                {{-- Distribution by Governorate --}}
+                <div class="col-xl-4">
+                    <div class="card card-flush h-xl-100">
+                        <div class="card-header pt-7">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label fw-bold text-gray-800">توزيع الوحدات</span>
+                                <span class="text-gray-400 mt-1 fw-semibold fs-6">حسب المحافظات</span>
+                            </h3>
+                        </div>
+                        <div class="card-body pt-5">
+                            @forelse($healthCentersByGovernorate as $governorate)
+                            <div class="d-flex align-items-center mb-7">
+                                <div class="symbol symbol-50px me-5">
+                                    <span class="symbol-label bg-light-primary">
+                                        <i class="ki-duotone ki-geolocation fs-2x text-primary">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="text-gray-800 fw-bold fs-6 d-block">{{ $governorate->name }}</span>
+                                    <span class="text-muted fw-semibold d-block">
+                                        {{ $governorate->health_centers_count }} وحدة صحية
+                                    </span>
+                                </div>
+                                <span class="badge badge-light-primary fs-8 fw-bold">
+                                    {{ $stats['total_health_centers'] > 0 ? round(($governorate->health_centers_count / $stats['total_health_centers']) * 100) : 0 }}%
+                                </span>
+                            </div>
+                            @empty
+                            <div class="text-center text-muted py-10">
+                                لا توجد بيانات
+                            </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-            </form>
+            </div>
+
+            {{-- Quick Actions --}}
+            <div class="row g-6 mt-6">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">إجراءات سريعة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <a href="{{ route('admin.health-centers.create') }}" class="btn btn-light-primary w-100">
+                                        <i class="ki-duotone ki-plus fs-2"></i>
+                                        إضافة وحدة صحية
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ route('admin.health-center-managers.create') }}" class="btn btn-light-success w-100">
+                                        <i class="ki-duotone ki-user-tick fs-2"></i>
+                                        إضافة مدير
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ route('admin.governorates.index') }}" class="btn btn-light-info w-100">
+                                        <i class="ki-duotone ki-geolocation fs-2"></i>
+                                        إدارة المحافظات
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ route('admin.cities.index') }}" class="btn btn-light-warning w-100">
+                                        <i class="ki-duotone ki-map fs-2"></i>
+                                        إدارة المدن
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
-@endsection
-
-@section('javascript')
-    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            $('#datatable').DataTable({
-                "language": {
-                    "sProcessing": "جارٍ التحميل...",
-                    "sLengthMenu": "أظهر _MENU_ مدخلات",
-                    "sZeroRecords": "لم يعثر على أية سجلات",
-                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                    "sSearch": "ابحث:",
-                    "oPaginate": {
-                        "sFirst": "الأول",
-                        "sPrevious": "السابق",
-                        "sNext": "التالي",
-                        "sLast": "الأخير"
-                    }
-                }
-            });
-
-            var deleteAccountModal = document.getElementById('deleteAccountModal');
-            deleteAccountModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var accountId = button.getAttribute('data-account-id');
-                var form = document.getElementById('delete-account-form');
-                form.action = '/accounts/' + accountId;
-            });
-        });
-    </script>
 @endsection
